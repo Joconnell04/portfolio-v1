@@ -1,18 +1,21 @@
 "use client";
 
+import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 import {
-  motion,
-  useMotionValue,
-  useReducedMotion,
-  useSpring,
-} from "framer-motion";
-import { type ButtonHTMLAttributes, type HTMLAttributes, type PointerEvent as ReactPointerEvent, useRef } from "react";
+  type ButtonHTMLAttributes,
+  type HTMLAttributes,
+  type PointerEvent as ReactPointerEvent,
+  useRef,
+} from "react";
 import { cn } from "@/lib/utils";
 
 type MagneticSharedProps = {
   strength?: number;
   className?: string;
 };
+
+const MotionDiv = motion.div as unknown as React.ComponentType<any>;
+const MotionButton = motion.button as unknown as React.ComponentType<any>;
 
 function useMagneticMotion<T extends HTMLElement>(strength: number) {
   const ref = useRef<T | null>(null);
@@ -59,7 +62,7 @@ export function MagneticCard({
   const magnetic = useMagneticMotion<HTMLDivElement>(strength);
 
   return (
-    <motion.div
+    <MotionDiv
       ref={magnetic.ref}
       style={magnetic.style}
       onPointerMove={magnetic.onPointerMove}
@@ -67,10 +70,10 @@ export function MagneticCard({
       whileHover={magnetic.reduceMotion ? undefined : { scale: 1.01 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className={cn("will-change-transform", className)}
-      {...props}
+      {...(props as any)}
     >
       {children}
-    </motion.div>
+    </MotionDiv>
   );
 }
 
@@ -84,7 +87,7 @@ export function MagneticButton({
   const magnetic = useMagneticMotion<HTMLButtonElement>(strength);
 
   return (
-    <motion.button
+    <MotionButton
       ref={magnetic.ref}
       type={type}
       style={magnetic.style}
@@ -94,9 +97,9 @@ export function MagneticButton({
       whileTap={magnetic.reduceMotion ? undefined : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 280, damping: 24 }}
       className={cn("will-change-transform", className)}
-      {...props}
+      {...(props as any)}
     >
       {children}
-    </motion.button>
+    </MotionButton>
   );
 }
