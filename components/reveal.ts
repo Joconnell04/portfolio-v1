@@ -4,8 +4,8 @@ export const fadeUpContainer: Variants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.06,
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
     },
   },
 };
@@ -13,13 +13,11 @@ export const fadeUpContainer: Variants = {
 export const fadeUpItem: Variants = {
   hidden: {
     opacity: 0,
-    y: 22,
-    filter: "blur(6px)",
+    y: 16,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
   },
 };
 
