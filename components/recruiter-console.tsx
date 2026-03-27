@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useChat, type UIMessage } from "ai/react";
+import { useChat } from "ai/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -12,14 +12,16 @@ type RecruiterProfile = {
 
 type RenderPart = { type: "text"; text: string } | { type: string; [key: string]: unknown };
 
-type RenderableMessage = UIMessage & {
+type ChatMessage = {
+  id: string;
+  role: "user" | "assistant" | "system";
   parts?: RenderPart[];
   content?: string;
 };
 
 const STORAGE_KEY = "recruiter-access-profile";
 
-function extractMessageText(message: RenderableMessage) {
+function extractMessageText(message: ChatMessage) {
   if (typeof message.content === "string" && message.content.trim()) {
     return message.content;
   }
@@ -35,12 +37,12 @@ function extractMessageText(message: RenderableMessage) {
   return "";
 }
 
-function MessageBubble({ message }: { message: RenderableMessage }) {
+function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
   const text = extractMessageText(message) || "…";
 
   return (
-    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}> 
+    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
           "max-w-[88%] whitespace-pre-wrap rounded-2xl border px-4 py-3 text-sm leading-6 shadow-lg",
@@ -297,7 +299,7 @@ export function RecruiterConsole() {
                         role.”
                       </div>
                     ) : (
-                      messages.map((message) => <MessageBubble key={message.id} message={message as RenderableMessage} />)
+                      messages.map((message) => <MessageBubble key={message.id} message={message as ChatMessage} />)
                     )}
                   </div>
 
