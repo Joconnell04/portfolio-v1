@@ -1,1 +1,403 @@
-"use client";\n\nimport { AnimatePresence, motion } from "framer-motion";\nimport { useChat, type UIMessage } from "@ai-sdk/react";\nimport { useEffect, useMemo, useRef, useState } from "react";\nimport { GitHubActivityHeatmap } from "@/components/github-heatmap";\nimport { MagneticButton } from "@/components/magnetic";\nimport { NoiseOverlay } from "@/components/noise-overlay";\nimport { ProjectsSection } from "@/components/projects-section";\nimport { ScrollProgress } from "@/components/scroll-progress";\nimport { TextScramble } from "@/components/text-scramble";\nimport { fadeUpContainer, fadeUpItem, viewportOnce } from "@/components/reveal";\nimport { cn } from "@/lib/utils";\nimport type { ContributionHeatmap } from "@/lib/github/contributions";\nimport type { PortfolioProject } from "@/lib/supabase/portfolio-projects";\n\ntype RecruiterProfile = {\n  name: string;\n  company: string;\n};\n\ntype RenderPart = { type: "text"; text: string } | { type: string; [key: string]: unknown };\n\ntype ChatMessage = UIMessage & {\n  content?: string;\n  parts?: RenderPart[];\n};\n\nconst STORAGE_KEY = "recruiter-access-profile";\nconst NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;\n\nfunction extractMessageText(message: ChatMessage) {\n  if (typeof message.content === "string" && message.content.trim()) {\n    return message.content;\n  }\n\n  if (Array.isArray(message.parts)) {\n    return message.parts\n      .filter((part): part is Extract<RenderPart, { type: "text" }> => part.type === "text")\n      .map((part) => part.text)\n      .join(" " )\n      .trim();\n  }\n\n  return "";\n}\n\nfunction MessageBubble({ message }: { message: ChatMessage }) {\n  const isUser = message.role === "user";\n  const text = extractMessageText(message) || "\u2026";\n\n  return (\n    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>\n      <div\n        className={cn(\n          "max-w-[88%] whitespace-pre-wrap rounded-2xl border px-4 py-3 text-sm leading-6 shadow-lg",\n          isUser\n            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-50"\n            : "border-white/10 bg-white/5 text-white/80"\n        )}\n      >\n        <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/35">\n          {isUser ? "Recruiter" : "Jackson AI"}\n        </div>\n        {text}\n      </div>\n    </div>\n  );\n}\n\nfunction AccessGate({\n  onSubmit,\n  disabled,\n  value,\n  onChange,\n}: {\n  onSubmit: (profile: RecruiterProfile) => void;\n  disabled: boolean;\n  value: RecruiterProfile;\n  onChange: (next: RecruiterProfile) => void;\n}) {\n  return (\n    <form\n      className="rounded-3xl border border-emerald-400/20 bg-black/55 p-4 backdrop-blur"\n      onSubmit={(event) => {\n        event.preventDefault();\n        onSubmit(value);\n      }}\n    >\n      <div className="mb-3">\n        <TextScramble className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" text="Recruiter access gate" />\n        <h2 className="mt-2 text-lg font-medium text-white">Identify yourself to open the terminal</h2>\n        <p className="mt-1 text-sm text-white/55">\n          Enter your name and company so the assistant can tailor the conversation for recruiting context.\n        </p>\n      </div>\n\n      <div className="grid gap-3 md:grid-cols-2">\n        <label className="grid gap-2 text-sm text-white/70">\n          Name\n          <input\n            value={value.name}\n            onChange={(event) => onChange({ ...value, name: event.target.value })}\n            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"\n            placeholder="Jordan Lee"\n          />\n        </label>\n        <label className="grid gap-2 text-sm text-white/70">\n          Company\n          <input\n            value={value.company}\n            onChange={(event) => onChange({ ...value, company: event.target.value })}\n            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"\n            placeholder="Vertex Talent"\n          />\n        </label>\n      </div>\n\n      <MagneticButton\n        type="submit"\n        disabled={disabled}\n        className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"\n      >\n        Enter terminal\n        <span aria-hidden>\u21B5</span>\n      </MagneticButton>\n    </form>\n  );\n}\n\nexport function RecruiterConsole({\n  projects,\n  heatmap,\n}: {\n  projects: PortfolioProject[];\n  heatmap: ContributionHeatmap | null;\n}) {\n  const [drawerOpen, setDrawerOpen] = useState(true);\n  const [profile, setProfile] = useState<RecruiterProfile | null>(null);\n  const [draftProfile, setDraftProfile] = useState<RecruiterProfile>({ name: "", company: "" });\n  const [messageInput, setMessageInput] = useState("");\n  const scrollRef = useRef<HTMLDivElement | null>(null);\n\n  const { messages, sendMessage, status, error } = useChat();\n\n  useEffect(() => {\n    const saved = window.localStorage.getItem(STORAGE_KEY);\n    if (!saved) return;\n\n    try {\n      const parsed = JSON.parse(saved) as RecruiterProfile;\n      if (parsed?.name && parsed?.company) {\n        setProfile(parsed);\n        setDraftProfile(parsed);\n      }\n    } catch {\n      window.localStorage.removeItem(STORAGE_KEY);\n    }\n  }, []);\n\n  useEffect(() => {\n    if (scrollRef.current) {\n      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;\n    }\n  }, [messages, drawerOpen]);\n\n  const openText = useMemo(() => {\n    if (profile) return ;\n    return "access required";\n  }, [profile]);\n\n  const readyToSend = Boolean(profile?.name.trim() && profile?.company.trim());\n  const isBusy = status === "submitted" || status === "streaming";\n\n  function submitProfile(nextProfile: RecruiterProfile) {\n    const trimmed = {\n      name: nextProfile.name.trim(),\n      company: nextProfile.company.trim(),\n    };\n\n    if (!trimmed.name || !trimmed.company) return;\n\n    setProfile(trimmed);\n    setDraftProfile(trimmed);\n    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));\n    setDrawerOpen(true);\n  }\n\n  return (\n    <>\n      <NoiseOverlay />\n      <ScrollProgress />\n\n      <main className="relative z-10 min-h-screen overflow-hidden text-white">\n        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-36 pt-8 sm:px-6 lg:px-8">\n          <motion.header\n            className="flex flex-col gap-4 border-b border-white/10 pb-8"\n            initial="hidden"\n            whileInView="visible"\n            viewport={viewportOnce}\n            variants={fadeUpContainer}\n          >\n            <motion.div variants={fadeUpItem} className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/45">\n              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">\n                recruiter console\n              </span>\n              <span>Jackson O\u2019Connell</span>\n              <span>experience graph</span>\n            </motion.div>\n\n            <motion.nav variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/30">\n              {NAV_ITEMS.map((item) => (\n                <TextScramble\n                  key={item}\n                  text={item}\n                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1"\n                />\n              ))}\n            </motion.nav>\n\n            <motion.div variants={fadeUpItem} className="max-w-4xl">\n              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">\n                <TextScramble text="A terminal-style recruiter interface" />\n                <span className="block text-white/70">for fast, evidence-backed selling.</span>\n              </h1>\n              <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 md:text-lg">\n                The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from\n                Jackson\u2019s experience graph through the /api/chat stream.\n              </p>\n            </motion.div>\n          </motion.header>\n\n          <motion.section\n            className="grid gap-4 py-8 md:grid-cols-3"\n            initial="hidden"\n            whileInView="visible"\n            viewport={viewportOnce}\n            variants={fadeUpContainer}\n          >\n            {[\n              "Tailwind layout with a terminal aesthetic",\n              "Framer Motion drawer transitions and polish",\n              "useChat-powered streaming conversation",\n            ].map((item) => (\n              <motion.div\n                key={item}\n                variants={fadeUpItem}\n                className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur"\n              >\n                {item}\n              </motion.div>\n            ))}\n          </motion.section>\n        </div>\n\n        <ProjectsSection projects={projects} />\n        <GitHubActivityHeatmap heatmap={heatmap} />\n      </main>\n\n      <motion.aside\n        initial={{ y: 120, opacity: 0 }}\n        animate={{ y: drawerOpen ? 0 : 92, opacity: 1 }}\n        transition={{ type: "spring", stiffness: 220, damping: 26 }}\n        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-7xl px-0 sm:px-4 sm:pb-4"\n      >\n        <div className="overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#020617]/95 shadow-[0_-24px_80px_rgba(0,0,0,0.55)] backdrop-blur xl:rounded-[2rem]">\n          <MagneticButton\n            type="button"\n            onClick={() => setDrawerOpen((value) => !value)}\n            className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"\n          >\n            <span className="flex items-center gap-3">\n              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />\n              <TextScramble className="font-medium text-white" text="Terminal drawer" />\n              <span className="text-white/35">{openText}</span>\n            </span>\n            <TextScramble\n              className="text-xs uppercase tracking-[0.25em] text-white/40"\n              text={drawerOpen ? "collapse" : "expand"}\n            />\n          </MagneticButton>\n\n          <AnimatePresence initial={false} mode="wait">\n            {drawerOpen && (\n              <motion.div\n                key="drawer-body"\n                initial={{ opacity: 0, y: 24 }}\n                animate={{ opacity: 1, y: 0 }}\n                exit={{ opacity: 0, y: 24 }}\n                transition={{ duration: 0.2 }}\n                className="grid gap-4 p-4 lg:grid-cols-[340px_minmax(0,1fr)]"\n              >\n                <div className="space-y-4">\n                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">\n                    <div className="flex items-center justify-between">\n                      <div>\n                        <TextScramble\n                          className="text-xs uppercase tracking-[0.28em] text-emerald-300/70"\n                          text="Recruiter mode"\n                        />\n                        <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>\n                      </div>\n                      <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/55">\n                        {readyToSend ? "authenticated" : "gated"}\n                      </span>\n                    </div>\n                    <p className="mt-3 text-sm leading-6 text-white/60">\n                      Ask for a pitch, role fit, resume bullets, or interview prep. The backend pulls relevant fragments\n                      from the portfolio embeddings table and streams the answer back to this drawer.\n                    </p>\n                  </div>\n\n                  {profile ? (\n                    <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-50">\n                      <div className="text-xs uppercase tracking-[0.28em] text-emerald-200/70">Access granted</div>\n                      <div className="mt-2 font-medium">\n                        {profile.name} at {profile.company}\n                      </div>\n                      <div className="mt-1 text-emerald-50/70">This session is personalized for recruiting context.</div>\n                      <MagneticButton\n                        type="button"\n                        onClick={() => {\n                          window.localStorage.removeItem(STORAGE_KEY);\n                          setProfile(null);\n                          setMessageInput("");\n                        }}\n                        className="mt-4 rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs text-emerald-50/80 transition hover:bg-emerald-300/10"\n                      >\n                        Reset gate\n                      </MagneticButton>\n                    </div>\n                  ) : (\n                    <AccessGate\n                      disabled={!draftProfile.name.trim() || !draftProfile.company.trim()}\n                      value={draftProfile}\n                      onChange={setDraftProfile}\n                      onSubmit={submitProfile}\n                    />\n                  )}\n                </div>\n\n                <div className="flex min-h-[560px] flex-col rounded-3xl border border-white/10 bg-black/40">\n                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/35">\n                    <TextScramble text="chat session" />\n                    <span>{status}</span>\n                  </div>\n\n                  <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">\n                    {messages.length === 0 ? (\n                      <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 p-6 text-sm leading-6 text-white/50">\n                        Start with a recruiting question. Example: \u201CGive me a 30-second pitch for Jackson for a product\n                        role.\u201D\n                      </div>\n                    ) : (\n                      messages.map((message) => <MessageBubble key={message.id} message={message as ChatMessage} />)\n                    )}\n                  </div>\n\n                  <form\n                    onSubmit={(event) => {\n                      event.preventDefault();\n                      if (!profile || !messageInput.trim() || isBusy) {\n                        return;\n                      }\n                      void sendMessage({ text: messageInput.trim() });\n                      setMessageInput("");\n                    }}\n                    className="border-t border-white/10 p-4"\n                  >\n                    <label className="mb-2 block text-xs uppercase tracking-[0.28em] text-white/35">\n                      Ask the recruiter agent\n                    </label>\n                    <textarea\n                      value={messageInput}\n                      onChange={(event) => setMessageInput(event.target.value)}\n                      disabled={!profile || isBusy}\n                      rows={3}\n                      className="w-full resize-none rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"\n                      placeholder={profile ? "e.g. What makes Jackson strong for this role?" : "Complete the gate to chat"}\n                    />\n                    <div className="mt-3 flex items-center justify-between gap-3">\n                      <p className="text-xs text-white/40">\n                        Powered by /api/chat and the portfolio_embeddings retrieval path.\n                      </p>\n                      <MagneticButton\n                        type="submit"\n                        disabled={!profile || !messageInput.trim() || isBusy}\n                        className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"\n                      >\n                        {isBusy ? "Streaming\u2026" : "Send"}\n                      </MagneticButton>\n                    </div>\n                    {error ? <p className="mt-3 text-sm text-rose-300">{error.message}</p> : null}\n                  </form>\n                </div>\n              </motion.div>\n            )}\n          </AnimatePresence>\n        </div>\n      </motion.aside>\n    </>\n  );\n}\n
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { useChat, type UIMessage } from "@ai-sdk/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { GitHubActivityHeatmap } from "@/components/github-heatmap";
+import { MagneticButton } from "@/components/magnetic";
+import { NoiseOverlay } from "@/components/noise-overlay";
+import { ProjectsSection } from "@/components/projects-section";
+import { ScrollProgress } from "@/components/scroll-progress";
+import { TextScramble } from "@/components/text-scramble";
+import { fadeUpContainer, fadeUpItem, viewportOnce } from "@/components/reveal";
+import { cn } from "@/lib/utils";
+import type { ContributionHeatmap } from "@/lib/github/contributions";
+import type { PortfolioProject } from "@/lib/supabase/portfolio-projects";
+
+type RecruiterProfile = {
+  name: string;
+  company: string;
+};
+
+type RenderPart = { type: "text"; text: string } | { type: string; [key: string]: unknown };
+
+type ChatMessage = UIMessage & {
+  content?: string;
+  parts?: RenderPart[];
+};
+
+const STORAGE_KEY = "recruiter-access-profile";
+const NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;
+
+function extractMessageText(message: ChatMessage) {
+  if (typeof message.content === "string" && message.content.trim()) {
+    return message.content;
+  }
+
+  if (Array.isArray(message.parts)) {
+    return message.parts
+      .filter((part): part is Extract<RenderPart, { type: "text" }> => part.type === "text")
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+  }
+
+  return "";
+}
+
+function MessageBubble({ message }: { message: ChatMessage }) {
+  const isUser = message.role === "user";
+  const text = extractMessageText(message) || "…";
+
+  return (
+    <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+      <div
+        className={cn(
+          "max-w-[88%] whitespace-pre-wrap rounded-2xl border px-4 py-3 text-sm leading-6 shadow-lg",
+          isUser
+            ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-50"
+            : "border-white/10 bg-white/5 text-white/80"
+        )}
+      >
+        <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/35">
+          {isUser ? "Recruiter" : "Jackson AI"}
+        </div>
+        {text}
+      </div>
+    </div>
+  );
+}
+
+function AccessGate({
+  onSubmit,
+  disabled,
+  value,
+  onChange,
+}: {
+  onSubmit: (profile: RecruiterProfile) => void;
+  disabled: boolean;
+  value: RecruiterProfile;
+  onChange: (next: RecruiterProfile) => void;
+}) {
+  return (
+    <form
+      className="rounded-3xl border border-emerald-400/20 bg-black/55 p-4 backdrop-blur"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSubmit(value);
+      }}
+    >
+      <div className="mb-3">
+        <TextScramble className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" text="Recruiter access gate" />
+        <h2 className="mt-2 text-lg font-medium text-white">Identify yourself to open the terminal</h2>
+        <p className="mt-1 text-sm text-white/55">
+          Enter your name and company so the assistant can tailor the conversation for recruiting context.
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="grid gap-2 text-sm text-white/70">
+          Name
+          <input
+            value={value.name}
+            onChange={(event) => onChange({ ...value, name: event.target.value })}
+            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            placeholder="Jordan Lee"
+          />
+        </label>
+        <label className="grid gap-2 text-sm text-white/70">
+          Company
+          <input
+            value={value.company}
+            onChange={(event) => onChange({ ...value, company: event.target.value })}
+            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            placeholder="Vertex Talent"
+          />
+        </label>
+      </div>
+
+      <MagneticButton
+        type="submit"
+        disabled={disabled}
+        className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Enter terminal
+        <span aria-hidden>↵</span>
+      </MagneticButton>
+    </form>
+  );
+}
+
+export function RecruiterConsole({
+  projects,
+  heatmap,
+}: {
+  projects: PortfolioProject[];
+  heatmap: ContributionHeatmap | null;
+}) {
+  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [profile, setProfile] = useState<RecruiterProfile | null>(null);
+  const [draftProfile, setDraftProfile] = useState<RecruiterProfile>({ name: "", company: "" });
+  const [messageInput, setMessageInput] = useState("");
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const { messages, sendMessage, status, error } = useChat();
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
+
+    try {
+      const parsed = JSON.parse(saved) as RecruiterProfile;
+      if (parsed?.name && parsed?.company) {
+        setProfile(parsed);
+        setDraftProfile(parsed);
+      }
+    } catch {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages, drawerOpen]);
+
+  const openText = useMemo(() => {
+    if (profile) return `${profile.name} @ ${profile.company}`;
+    return "access required";
+  }, [profile]);
+
+  const readyToSend = Boolean(profile?.name.trim() && profile?.company.trim());
+  const isBusy = status === "submitted" || status === "streaming";
+
+  function submitProfile(nextProfile: RecruiterProfile) {
+    const trimmed = {
+      name: nextProfile.name.trim(),
+      company: nextProfile.company.trim(),
+    };
+
+    if (!trimmed.name || !trimmed.company) return;
+
+    setProfile(trimmed);
+    setDraftProfile(trimmed);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+    setDrawerOpen(true);
+  }
+
+  return (
+    <>
+      <NoiseOverlay />
+      <ScrollProgress />
+
+      <main className="relative z-10 min-h-screen overflow-hidden text-white">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-36 pt-8 sm:px-6 lg:px-8">
+          <motion.header
+            className="flex flex-col gap-4 border-b border-white/10 pb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={fadeUpContainer}
+          >
+            <motion.div variants={fadeUpItem} className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/45">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
+                recruiter console
+              </span>
+              <span>Jackson O’Connell</span>
+              <span>experience graph</span>
+            </motion.div>
+
+            <motion.nav variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/30">
+              {NAV_ITEMS.map((item) => (
+                <TextScramble
+                  key={item}
+                  text={item}
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1"
+                />
+              ))}
+            </motion.nav>
+
+            <motion.div variants={fadeUpItem} className="max-w-4xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
+                <TextScramble text="A terminal-style recruiter interface" />
+                <span className="block text-white/70">for fast, evidence-backed selling.</span>
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 md:text-lg">
+                The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
+                Jackson’s experience graph through the /api/chat stream.
+              </p>
+            </motion.div>
+          </motion.header>
+
+          <motion.section
+            className="grid gap-4 py-8 md:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={fadeUpContainer}
+          >
+            {[
+              "Tailwind layout with a terminal aesthetic",
+              "Framer Motion drawer transitions and polish",
+              "useChat-powered streaming conversation",
+            ].map((item) => (
+              <motion.div
+                key={item}
+                variants={fadeUpItem}
+                className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur"
+              >
+                {item}
+              </motion.div>
+            ))}
+          </motion.section>
+        </div>
+
+        <ProjectsSection projects={projects} />
+        <GitHubActivityHeatmap heatmap={heatmap} />
+      </main>
+
+      <motion.aside
+        initial={{ y: 120, opacity: 0 }}
+        animate={{ y: drawerOpen ? 0 : 92, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 220, damping: 26 }}
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-7xl px-0 sm:px-4 sm:pb-4"
+      >
+        <div className="overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#020617]/95 shadow-[0_-24px_80px_rgba(0,0,0,0.55)] backdrop-blur xl:rounded-[2rem]">
+          <MagneticButton
+            type="button"
+            onClick={() => setDrawerOpen((value) => !value)}
+            className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"
+          >
+            <span className="flex items-center gap-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
+              <TextScramble className="font-medium text-white" text="Terminal drawer" />
+              <span className="text-white/35">{openText}</span>
+            </span>
+            <TextScramble
+              className="text-xs uppercase tracking-[0.25em] text-white/40"
+              text={drawerOpen ? "collapse" : "expand"}
+            />
+          </MagneticButton>
+
+          <AnimatePresence initial={false} mode="wait">
+            {drawerOpen && (
+              <motion.div
+                key="drawer-body"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ duration: 0.2 }}
+                className="grid gap-4 p-4 lg:grid-cols-[340px_minmax(0,1fr)]"
+              >
+                <div className="space-y-4">
+                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <TextScramble
+                          className="text-xs uppercase tracking-[0.28em] text-emerald-300/70"
+                          text="Recruiter mode"
+                        />
+                        <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>
+                      </div>
+                      <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/55">
+                        {readyToSend ? "authenticated" : "gated"}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-white/60">
+                      Ask for a pitch, role fit, resume bullets, or interview prep. The backend pulls relevant fragments
+                      from the portfolio embeddings table and streams the answer back to this drawer.
+                    </p>
+                  </div>
+
+                  {profile ? (
+                    <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-50">
+                      <div className="text-xs uppercase tracking-[0.28em] text-emerald-200/70">Access granted</div>
+                      <div className="mt-2 font-medium">
+                        {profile.name} at {profile.company}
+                      </div>
+                      <div className="mt-1 text-emerald-50/70">This session is personalized for recruiting context.</div>
+                      <MagneticButton
+                        type="button"
+                        onClick={() => {
+                          window.localStorage.removeItem(STORAGE_KEY);
+                          setProfile(null);
+                          setMessageInput("");
+                        }}
+                        className="mt-4 rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs text-emerald-50/80 transition hover:bg-emerald-300/10"
+                      >
+                        Reset gate
+                      </MagneticButton>
+                    </div>
+                  ) : (
+                    <AccessGate
+                      disabled={!draftProfile.name.trim() || !draftProfile.company.trim()}
+                      value={draftProfile}
+                      onChange={setDraftProfile}
+                      onSubmit={submitProfile}
+                    />
+                  )}
+                </div>
+
+                <div className="flex min-h-[560px] flex-col rounded-3xl border border-white/10 bg-black/40">
+                  <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/35">
+                    <TextScramble text="chat session" />
+                    <span>{status}</span>
+                  </div>
+
+                  <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+                    {messages.length === 0 ? (
+                      <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 p-6 text-sm leading-6 text-white/50">
+                        Start with a recruiting question. Example: “Give me a 30-second pitch for Jackson for a product
+                        role.”
+                      </div>
+                    ) : (
+                      messages.map((message) => <MessageBubble key={message.id} message={message as ChatMessage} />)
+                    )}
+                  </div>
+
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      if (!profile || !messageInput.trim() || isBusy) {
+                        return;
+                      }
+                      void sendMessage({ text: messageInput.trim() });
+                      setMessageInput("");
+                    }}
+                    className="border-t border-white/10 p-4"
+                  >
+                    <label className="mb-2 block text-xs uppercase tracking-[0.28em] text-white/35">
+                      Ask the recruiter agent
+                    </label>
+                    <textarea
+                      value={messageInput}
+                      onChange={(event) => setMessageInput(event.target.value)}
+                      disabled={!profile || isBusy}
+                      rows={3}
+                      className="w-full resize-none rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
+                      placeholder={profile ? "e.g. What makes Jackson strong for this role?" : "Complete the gate to chat"}
+                    />
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <p className="text-xs text-white/40">
+                        Powered by /api/chat and the portfolio_embeddings retrieval path.
+                      </p>
+                      <MagneticButton
+                        type="submit"
+                        disabled={!profile || !messageInput.trim() || isBusy}
+                        className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isBusy ? "Streaming…" : "Send"}
+                      </MagneticButton>
+                    </div>
+                    {error ? <p className="mt-3 text-sm text-rose-300">{error.message}</p> : null}
+                  </form>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.aside>
+    </>
+  );
+}
