@@ -1,10 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useChat } from "ai/react";
+import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { TextScramble } from "@/components/text-scramble";
+import { ProjectsSection } from "@/components/projects-section";
+import type { PortfolioProject } from "@/lib/supabase/portfolio-projects";
 
 type RecruiterProfile = {
   name: string;
@@ -13,11 +15,9 @@ type RecruiterProfile = {
 
 type RenderPart = { type: "text"; text: string } | { type: string; [key: string]: unknown };
 
-type ChatMessage = {
-  id: string;
-  role: "user" | "assistant" | "system";
-  parts?: RenderPart[];
+type ChatMessage = UIMessage & {
   content?: string;
+  parts?: RenderPart[];
 };
 
 const STORAGE_KEY = "recruiter-access-profile";
@@ -122,7 +122,7 @@ function AccessGate({
   );
 }
 
-export function RecruiterConsole() {
+export function RecruiterConsole({ projects }: { projects: PortfolioProject[] }) {
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [profile, setProfile] = useState<RecruiterProfile | null>(null);
   const [draftProfile, setDraftProfile] = useState<RecruiterProfile>({ name: "", company: "" });
@@ -203,17 +203,7 @@ export function RecruiterConsole() {
           </div>
         </header>
 
-        <section className="grid gap-4 py-8 md:grid-cols-3">
-          {[
-            "Tailwind layout with a terminal aesthetic",
-            "Framer Motion drawer transitions and polish",
-            "useChat-powered streaming conversation",
-          ].map((item) => (
-            <div key={item} className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur">
-              <TextScramble text={item} />
-            </div>
-          ))}
-        </section>
+        <ProjectsSection projects={projects} />
       </div>
 
       <motion.aside
@@ -233,7 +223,10 @@ export function RecruiterConsole() {
               <TextScramble className="font-medium text-white" text="Terminal drawer" />
               <span className="text-white/35">{openText}</span>
             </span>
-            <TextScramble className="text-xs uppercase tracking-[0.25em] text-white/40" text={drawerOpen ? "collapse" : "expand"} />
+            <TextScramble
+              className="text-xs uppercase tracking-[0.25em] text-white/40"
+              text={drawerOpen ? "collapse" : "expand"}
+            />
           </button>
 
           <AnimatePresence initial={false} mode="wait">
@@ -250,7 +243,10 @@ export function RecruiterConsole() {
                   <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <TextScramble className="text-xs uppercase tracking-[0.28em] text-emerald-300/70" text="Recruiter mode" />
+                        <TextScramble
+                          className="text-xs uppercase tracking-[0.28em] text-emerald-300/70"
+                          text="Recruiter mode"
+                        />
                         <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>
                       </div>
                       <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/55">
