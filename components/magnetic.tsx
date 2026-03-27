@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
+import type { HTMLMotionProps } from "framer-motion";
 import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
@@ -58,7 +59,7 @@ export function MagneticCard({
   className,
   children,
   ...props
-}: HTMLAttributes<HTMLDivElement> & MagneticSharedProps) {
+}: HTMLMotionProps<"div"> & MagneticSharedProps) {
   const magnetic = useMagneticMotion<HTMLDivElement>(strength);
 
   return (
@@ -83,7 +84,7 @@ export function MagneticButton({
   children,
   type = "button",
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & MagneticSharedProps) {
+}: HTMLMotionProps<"button"> & MagneticSharedProps) {
   const magnetic = useMagneticMotion<HTMLButtonElement>(strength);
 
   return (
