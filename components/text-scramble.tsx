@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%*+_<>/\\[]{}";
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%*+_<>/\[]{}";
 
 function hashString(value: string) {
   let hash = 2166136261;
@@ -18,7 +18,7 @@ function hashString(value: string) {
 }
 
 function pickGlyph(source: string, index: number, phase: number) {
-  const glyphSeed = hashString(`${source}:${index}:${phase}`);
+  const glyphSeed = hashString([source, index, phase].join(":"));
   return GLYPHS[glyphSeed % GLYPHS.length] ?? "#";
 }
 
@@ -30,11 +30,34 @@ function scrambleText(source: string, progress: number) {
   return source
     .split("")
     .map((character, index) => {
-      if (/\s/.test(character)) return character;
+      if (/s/.test(character)) return character;
       if (index < revealCount) return character;
       return pickGlyph(source, index, phase);
     })
     .join("");
+}
+
+function useFinePointer() {
+  const [isFinePointer, setIsFinePointer] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const query = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setIsFinePointer(query.matches);
+
+    update();
+
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", update);
+      return () => query.removeEventListener("change", update);
+    }
+
+    query.addListener(update);
+    return () => query.removeListener(update);
+  }, []);
+
+  return isFinePointer;
 }
 
 export function TextScramble({
@@ -47,12 +70,14 @@ export function TextScramble({
   trigger?: boolean;
 }) {
   const reduceMotion = useReducedMotion();
+  const isFinePointer = useFinePointer();
+  const shouldAnimate = trigger && !reduceMotion && isFinePointer;
   const [active, setActive] = useState(false);
   const [displayText, setDisplayText] = useState(() => scrambleText(text, 0));
   const durationMs = Math.max(500, Math.min(1100, text.length * 38));
 
   useEffect(() => {
-    if (!trigger) {
+    if (!shouldAnimate) {
       setActive(false);
       setDisplayText(text);
       return;
@@ -60,15 +85,10 @@ export function TextScramble({
 
     setActive(false);
     setDisplayText(scrambleText(text, 0));
-  }, [text, trigger]);
+  }, [shouldAnimate, text]);
 
   useEffect(() => {
-    if (!trigger || !active) return;
-
-    if (reduceMotion) {
-      setDisplayText(text);
-      return;
-    }
+    if (!shouldAnimate || !active) return;
 
     let frame = 0;
     const frames = Math.max(12, Math.round(durationMs / 24));
@@ -84,18 +104,18 @@ export function TextScramble({
     }, 24);
 
     return () => window.clearInterval(timer);
-  }, [active, durationMs, reduceMotion, text, trigger]);
+  }, [active, durationMs, shouldAnimate, text]);
 
   return (
     <motion.span
       aria-label={text}
-      initial={{ opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.75 }}
-      onViewportEnter={() => setActive(true)}
+      initial={shouldAnimate ? { opacity: 0, y: 8 } : { opacity: 1, y: 0 }}
+      whileInView={shouldAnimate ? { opacity: 1, y: 0 } : undefined}
+      viewport={shouldAnimate ? { once: true, amount: 0.65 } : undefined}
+      onViewportEnter={shouldAnimate ? () => setActive(true) : undefined}
       className={cn("inline-block tracking-tight", className)}
     >
-      {reduceMotion ? text : displayText}
+      {shouldAnimate ? displayText : text}
     </motion.span>
   );
 }
