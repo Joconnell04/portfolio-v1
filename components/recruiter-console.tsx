@@ -3,9 +3,15 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { TextScramble } from "@/components/text-scramble";
+import { GitHubActivityHeatmap } from "@/components/github-heatmap";
+import { MagneticButton } from "@/components/magnetic";
+import { NoiseOverlay } from "@/components/noise-overlay";
 import { ProjectsSection } from "@/components/projects-section";
+import { ScrollProgress } from "@/components/scroll-progress";
+import { TextScramble } from "@/components/text-scramble";
+import { fadeUpContainer, fadeUpItem, viewportOnce } from "@/components/reveal";
+import { cn } from "@/lib/utils";
+import type { ContributionHeatmap } from "@/lib/github/contributions";
 import type { PortfolioProject } from "@/lib/supabase/portfolio-projects";
 
 type RecruiterProfile = {
@@ -110,19 +116,25 @@ function AccessGate({
         </label>
       </div>
 
-      <button
+      <MagneticButton
         type="submit"
         disabled={disabled}
         className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Enter terminal
         <span aria-hidden>↵</span>
-      </button>
+      </MagneticButton>
     </form>
   );
 }
 
-export function RecruiterConsole({ projects }: { projects: PortfolioProject[] }) {
+export function RecruiterConsole({
+  projects,
+  heatmap,
+}: {
+  projects: PortfolioProject[];
+  heatmap: ContributionHeatmap | null;
+}) {
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [profile, setProfile] = useState<RecruiterProfile | null>(null);
   const [draftProfile, setDraftProfile] = useState<RecruiterProfile>({ name: "", company: "" });
@@ -176,35 +188,75 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
   }
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_42%),linear-gradient(180deg,#030712_0%,#020617_50%,#010208_100%)] text-white">
-      <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-36 pt-8 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-white/10 pb-8">
-          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/45">
-            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
-              recruiter console
-            </span>
-            <span>Jackson O’Connell</span>
-            <span>experience graph</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/30">
-            {NAV_ITEMS.map((item) => (
-              <TextScramble key={item} text={item} className="rounded-full border border-white/10 bg-white/5 px-3 py-1" />
+    <>
+      <NoiseOverlay />
+      <ScrollProgress />
+
+      <main className="relative z-10 min-h-screen overflow-hidden text-white">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-36 pt-8 sm:px-6 lg:px-8">
+          <motion.header
+            className="flex flex-col gap-4 border-b border-white/10 pb-8"
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={fadeUpContainer}
+          >
+            <motion.div variants={fadeUpItem} className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/45">
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
+                recruiter console
+              </span>
+              <span>Jackson O’Connell</span>
+              <span>experience graph</span>
+            </motion.div>
+
+            <motion.nav variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/30">
+              {NAV_ITEMS.map((item) => (
+                <TextScramble
+                  key={item}
+                  text={item}
+                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1"
+                />
+              ))}
+            </motion.nav>
+
+            <motion.div variants={fadeUpItem} className="max-w-4xl">
+              <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
+                <TextScramble text="A terminal-style recruiter interface" />
+                <span className="block text-white/70">for fast, evidence-backed selling.</span>
+              </h1>
+              <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 md:text-lg">
+                The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
+                Jackson’s experience graph through the /api/chat stream.
+              </p>
+            </motion.div>
+          </motion.header>
+
+          <motion.section
+            className="grid gap-4 py-8 md:grid-cols-3"
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOnce}
+            variants={fadeUpContainer}
+          >
+            {[
+              "Tailwind layout with a terminal aesthetic",
+              "Framer Motion drawer transitions and polish",
+              "useChat-powered streaming conversation",
+            ].map((item) => (
+              <motion.div
+                key={item}
+                variants={fadeUpItem}
+                className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur"
+              >
+                {item}
+              </motion.div>
             ))}
-          </div>
-          <div className="max-w-4xl">
-            <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
-              <TextScramble text="A terminal-style recruiter interface" />
-              <span className="block text-white/70">for fast, evidence-backed selling.</span>
-            </h1>
-            <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 md:text-lg">
-              The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
-              Jackson’s experience graph through the /api/chat stream.
-            </p>
-          </div>
-        </header>
+          </motion.section>
+        </div>
 
         <ProjectsSection projects={projects} />
-      </div>
+        <GitHubActivityHeatmap heatmap={heatmap} />
+      </main>
 
       <motion.aside
         initial={{ y: 120, opacity: 0 }}
@@ -213,7 +265,7 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
         className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-7xl px-0 sm:px-4 sm:pb-4"
       >
         <div className="overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#020617]/95 shadow-[0_-24px_80px_rgba(0,0,0,0.55)] backdrop-blur xl:rounded-[2rem]">
-          <button
+          <MagneticButton
             type="button"
             onClick={() => setDrawerOpen((value) => !value)}
             className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"
@@ -227,7 +279,7 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
               className="text-xs uppercase tracking-[0.25em] text-white/40"
               text={drawerOpen ? "collapse" : "expand"}
             />
-          </button>
+          </MagneticButton>
 
           <AnimatePresence initial={false} mode="wait">
             {drawerOpen && (
@@ -266,7 +318,7 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
                         {profile.name} at {profile.company}
                       </div>
                       <div className="mt-1 text-emerald-50/70">This session is personalized for recruiting context.</div>
-                      <button
+                      <MagneticButton
                         type="button"
                         onClick={() => {
                           window.localStorage.removeItem(STORAGE_KEY);
@@ -276,7 +328,7 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
                         className="mt-4 rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs text-emerald-50/80 transition hover:bg-emerald-300/10"
                       >
                         Reset gate
-                      </button>
+                      </MagneticButton>
                     </div>
                   ) : (
                     <AccessGate
@@ -330,13 +382,13 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
                       <p className="text-xs text-white/40">
                         Powered by /api/chat and the portfolio_embeddings retrieval path.
                       </p>
-                      <button
+                      <MagneticButton
                         type="submit"
                         disabled={!profile || !input.trim() || isBusy}
                         className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isBusy ? "Streaming…" : "Send"}
-                      </button>
+                      </MagneticButton>
                     </div>
                     {error ? <p className="mt-3 text-sm text-rose-300">{error.message}</p> : null}
                   </form>
@@ -346,6 +398,6 @@ export function RecruiterConsole({ projects }: { projects: PortfolioProject[] })
           </AnimatePresence>
         </div>
       </motion.aside>
-    </main>
+    </>
   );
 }
