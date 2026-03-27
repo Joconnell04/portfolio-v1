@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useChat } from "ai/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { TextScramble } from "@/components/text-scramble";
 
 type RecruiterProfile = {
   name: string;
@@ -20,6 +21,7 @@ type ChatMessage = {
 };
 
 const STORAGE_KEY = "recruiter-access-profile";
+const NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;
 
 function extractMessageText(message: ChatMessage) {
   if (typeof message.content === "string" && message.content.trim()) {
@@ -80,7 +82,7 @@ function AccessGate({
       }}
     >
       <div className="mb-3">
-        <p className="text-xs uppercase tracking-[0.3em] text-emerald-300/70">Recruiter access gate</p>
+        <TextScramble className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" text="Recruiter access gate" />
         <h2 className="mt-2 text-lg font-medium text-white">Identify yourself to open the terminal</h2>
         <p className="mt-1 text-sm text-white/55">
           Enter your name and company so the assistant can tailor the conversation for recruiting context.
@@ -184,9 +186,15 @@ export function RecruiterConsole() {
             <span>Jackson O’Connell</span>
             <span>experience graph</span>
           </div>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-white/30">
+            {NAV_ITEMS.map((item) => (
+              <TextScramble key={item} text={item} className="rounded-full border border-white/10 bg-white/5 px-3 py-1" />
+            ))}
+          </div>
           <div className="max-w-4xl">
             <h1 className="text-4xl font-semibold tracking-tight text-white md:text-6xl">
-              A terminal-style recruiter interface for fast, evidence-backed selling.
+              <TextScramble text="A terminal-style recruiter interface" />
+              <span className="block text-white/70">for fast, evidence-backed selling.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-base leading-7 text-white/65 md:text-lg">
               The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
@@ -202,7 +210,7 @@ export function RecruiterConsole() {
             "useChat-powered streaming conversation",
           ].map((item) => (
             <div key={item} className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur">
-              {item}
+              <TextScramble text={item} />
             </div>
           ))}
         </section>
@@ -222,12 +230,10 @@ export function RecruiterConsole() {
           >
             <span className="flex items-center gap-3">
               <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-              <span className="font-medium text-white">Terminal drawer</span>
+              <TextScramble className="font-medium text-white" text="Terminal drawer" />
               <span className="text-white/35">{openText}</span>
             </span>
-            <span className="text-xs uppercase tracking-[0.25em] text-white/40">
-              {drawerOpen ? "collapse" : "expand"}
-            </span>
+            <TextScramble className="text-xs uppercase tracking-[0.25em] text-white/40" text={drawerOpen ? "collapse" : "expand"} />
           </button>
 
           <AnimatePresence initial={false} mode="wait">
@@ -244,7 +250,7 @@ export function RecruiterConsole() {
                   <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs uppercase tracking-[0.28em] text-emerald-300/70">Recruiter mode</p>
+                        <TextScramble className="text-xs uppercase tracking-[0.28em] text-emerald-300/70" text="Recruiter mode" />
                         <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>
                       </div>
                       <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/55">
@@ -288,7 +294,7 @@ export function RecruiterConsole() {
 
                 <div className="flex min-h-[560px] flex-col rounded-3xl border border-white/10 bg-black/40">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/35">
-                    <span>chat session</span>
+                    <TextScramble text="chat session" />
                     <span>{status}</span>
                   </div>
 
