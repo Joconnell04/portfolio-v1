@@ -28,6 +28,7 @@ type ChatMessage = UIMessage & {
 
 const STORAGE_KEY = "recruiter-access-profile";
 const NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;
+const BOOT_LINES = ["booting shell", "assembling neon frame", "loading chat tunnel", "aligning project windows"] as const;
 
 const SOCIAL_LINKS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/jackson-t-oconnell/", ariaLabel: "Jackson O'Connell on LinkedIn" },
@@ -87,7 +88,7 @@ function AccessGate({
 }) {
   return (
     <form
-      className="rounded-3xl border border-emerald-400/20 bg-black/55 p-4 backdrop-blur"
+      className="hud-window rounded-none bg-black/95 p-4 backdrop-blur"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit(value);
@@ -107,7 +108,7 @@ function AccessGate({
           <input
             value={value.name}
             onChange={(event) => onChange({ ...value, name: event.target.value })}
-            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className="rounded-none border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
             placeholder="Jordan Lee"
           />
         </label>
@@ -116,7 +117,7 @@ function AccessGate({
           <input
             value={value.company}
             onChange={(event) => onChange({ ...value, company: event.target.value })}
-            className="rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className="rounded-none border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
             placeholder="Vertex Talent"
           />
         </label>
@@ -125,7 +126,7 @@ function AccessGate({
       <MagneticButton
         type="submit"
         disabled={disabled}
-        className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-400/35 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+        className="hud-button mt-4 inline-flex items-center gap-2 rounded-none px-4 py-2 text-sm font-medium text-[#eaffef] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Enter terminal
         <span aria-hidden>↵</span>
@@ -165,6 +166,16 @@ export function RecruiterConsole({
   }, []);
 
   useEffect(() => {
+    const updatePointer = (event: PointerEvent) => {
+      document.documentElement.style.setProperty("--pointer-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--pointer-y", `${event.clientY}px`);
+    };
+
+    window.addEventListener("pointermove", updatePointer);
+    return () => window.removeEventListener("pointermove", updatePointer);
+  }, []);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
@@ -197,8 +208,8 @@ export function RecruiterConsole({
       <NoiseOverlay />
       <ScrollProgress />
 
-      <main className="relative z-10 min-h-screen overflow-x-hidden text-white">
-        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-32 pt-6 sm:px-6 sm:pb-36 lg:px-8 lg:pt-8">
+      <main className="relative z-10 min-h-screen overflow-x-hidden bg-transparent text-white">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 pb-28 pt-6 sm:px-6 sm:pb-32 lg:px-8 lg:pt-8">
           <motion.header
             className="flex flex-col gap-4 border-b border-white/10 pb-6 sm:pb-8"
             initial="hidden"
@@ -207,7 +218,7 @@ export function RecruiterConsole({
             variants={fadeUpContainer}
           >
             <motion.div variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-white/45 sm:gap-3 sm:text-xs sm:tracking-[0.3em]">
-              <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
+              <span className="border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
                 recruiter console
               </span>
               <span>Jackson O’Connell</span>
@@ -219,7 +230,7 @@ export function RecruiterConsole({
                 <TextScramble
                   key={item}
                   text={item}
-                  className="rounded-full border border-white/10 bg-white/5 px-3 py-1"
+                  className="border border-white/10 bg-white/5 px-3 py-1"
                 />
               ))}
             </motion.nav>
@@ -251,7 +262,7 @@ export function RecruiterConsole({
               <motion.div
                 key={item}
                 variants={fadeUpItem}
-                className="rounded-3xl border border-white/10 bg-white/5 p-5 text-sm text-white/72 backdrop-blur"
+                className="hud-window rounded-none bg-black/90 p-5 text-sm text-[#d7ffe1] backdrop-blur"
               >
                 {item}
               </motion.div>
@@ -271,7 +282,7 @@ export function RecruiterConsole({
         >
           <motion.div
             variants={fadeUpItem}
-            className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+            className="hud-window flex flex-col gap-4 rounded-none bg-black/90 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <div className="text-xs uppercase tracking-[0.3em] text-white/35">Portfolio links</div>
@@ -285,7 +296,7 @@ export function RecruiterConsole({
                   target="_blank"
                   rel="noreferrer noopener"
                   aria-label={link.ariaLabel}
-                  className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-sm text-white/75 transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
+                  className="hud-button inline-flex items-center px-4 py-2 text-sm text-[#ebfff1] transition hover:-translate-y-0.5 focus:outline-none"
                 >
                   {link.label}
                 </a>
@@ -301,14 +312,14 @@ export function RecruiterConsole({
         transition={{ type: "spring", stiffness: 220, damping: 26 }}
         className="fixed inset-x-0 bottom-0 z-50 mx-auto max-w-7xl px-2 pb-2 sm:px-4 sm:pb-4"
       >
-        <div className="overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#020617]/95 shadow-[0_-24px_80px_rgba(0,0,0,0.55)] backdrop-blur xl:rounded-[2rem]">
+        <div className="hud-window overflow-hidden bg-black/96 shadow-[0_-24px_80px_rgba(0,255,135,0.24)] backdrop-blur">
           <MagneticButton
             type="button"
             onClick={() => setDrawerOpen((value) => !value)}
             className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"
           >
             <span className="flex items-center gap-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
+              <span className="h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
               <TextScramble className="font-medium text-white" text="Terminal drawer" />
               <span className="text-white/35">{openText}</span>
             </span>
@@ -329,7 +340,7 @@ export function RecruiterConsole({
                 className="grid gap-3 p-3 sm:p-4 lg:grid-cols-[340px_minmax(0,1fr)]"
               >
                 <div className="space-y-3">
-                  <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
+                  <div className="hud-window rounded-none bg-black/90 p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <TextScramble
@@ -338,7 +349,7 @@ export function RecruiterConsole({
                         />
                         <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>
                       </div>
-                      <span className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-xs text-white/55">
+                      <span className="border border-white/10 bg-black/80 px-3 py-1 text-xs text-white/55">
                         {readyToSend ? "authenticated" : "gated"}
                       </span>
                     </div>
@@ -349,7 +360,7 @@ export function RecruiterConsole({
                   </div>
 
                   {profile ? (
-                    <div className="rounded-3xl border border-emerald-400/20 bg-emerald-400/10 p-4 text-sm text-emerald-50">
+                    <div className="hud-window rounded-none bg-[#031109] p-4 text-sm text-[#adffbd]">
                       <div className="text-xs uppercase tracking-[0.28em] text-emerald-200/70">Access granted</div>
                       <div className="mt-2 font-medium">
                         {profile.name} at {profile.company}
@@ -362,7 +373,7 @@ export function RecruiterConsole({
                           setProfile(null);
                           setMessageInput("");
                         }}
-                        className="mt-4 rounded-full border border-emerald-300/20 px-3 py-1.5 text-xs text-emerald-50/80 transition hover:bg-emerald-300/10"
+                        className="hud-button mt-4 inline-flex items-center px-3 py-1.5 text-xs text-[#ebfff1] transition hover:-translate-y-0.5"
                       >
                         Reset gate
                       </MagneticButton>
@@ -377,7 +388,7 @@ export function RecruiterConsole({
                   )}
                 </div>
 
-                <div className="flex min-h-[420px] max-h-[calc(100dvh-10rem)] flex-col rounded-3xl border border-white/10 bg-black/40">
+                <div className="hud-window flex min-h-[420px] max-h-[calc(100dvh-10rem)] flex-col rounded-none bg-black/88">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/35">
                     <TextScramble text="chat session" />
                     <span>{status}</span>
@@ -385,7 +396,7 @@ export function RecruiterConsole({
 
                   <div ref={scrollRef} className="flex-1 min-h-0 space-y-3 overflow-y-auto overscroll-contain px-4 py-4 [WebkitOverflowScrolling:touch]">
                     {messages.length === 0 ? (
-                      <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 p-6 text-sm leading-6 text-white/50">
+                      <div className="hud-window border-dashed border-white/10 bg-black/85 p-6 text-sm leading-6 text-[#9fffb7]">
                         Start with a recruiting question. Example: “Give me a 30-second pitch for Jackson for a product
                         role.”
                       </div>
@@ -413,7 +424,7 @@ export function RecruiterConsole({
                       onChange={(event) => setMessageInput(event.target.value)}
                       disabled={!profile || isBusy}
                       rows={3}
-                      className="w-full resize-none rounded-2xl border border-white/10 bg-black/50 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full resize-none rounded-none border border-white/10 bg-black/85 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
                       placeholder={profile ? "e.g. What makes Jackson strong for this role?" : "Complete the gate to chat"}
                     />
                     <div className="mt-3 flex items-center justify-between gap-3">
@@ -423,7 +434,7 @@ export function RecruiterConsole({
                       <MagneticButton
                         type="submit"
                         disabled={!profile || !messageInput.trim() || isBusy}
-                        className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/15 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:bg-emerald-400/20 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="hud-button inline-flex items-center gap-2 rounded-none px-4 py-2 text-sm font-medium text-[#ebfff1] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isBusy ? "Streaming…" : "Send"}
                       </MagneticButton>
