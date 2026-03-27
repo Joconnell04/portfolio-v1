@@ -6,6 +6,7 @@ import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type PointerEvent as ReactPointerEvent,
+  type ComponentType,
   useRef,
 } from "react";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,8 @@ type MagneticSharedProps = {
   className?: string;
 };
 
-const MotionDiv = motion.div as unknown as React.ComponentType<any>;
-const MotionButton = motion.button as unknown as React.ComponentType<any>;
+const MotionDiv = motion.div as unknown as ComponentType<any>;
+const MotionButton = motion.button as unknown as ComponentType<any>;
 
 function useMagneticMotion<T extends HTMLElement>(strength: number) {
   const ref = useRef<T | null>(null);
