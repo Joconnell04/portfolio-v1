@@ -1,22 +1,38 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%*+_<>/\\[]{}";
 
+function hashString(value: string) {
+  let hash = 2166136261;
+
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
+function pickGlyph(source: string, index: number, phase: number) {
+  const glyphSeed = hashString(`${source}:${index}:${phase}`);
+  return GLYPHS[glyphSeed % GLYPHS.length] ?? "#";
+}
+
 function scrambleText(source: string, progress: number) {
   const safeProgress = Math.min(1, Math.max(0, progress));
   const revealCount = Math.floor(source.length * safeProgress);
+  const phase = Math.floor(safeProgress * 18);
 
   return source
     .split("")
-    .map((char, index) => {
-      if (char === " ") return " ";
-      if (index < revealCount) return char;
-      const glyphIndex = Math.floor(Math.random() * GLYPHS.length);
-      return GLYPHS[glyphIndex] ?? char;
+    .map((character, index) => {
+      if (/\s/.test(character)) return character;
+      if (index < revealCount) return character;
+      return pickGlyph(source, index, phase);
     })
     .join("");
 }
@@ -33,12 +49,21 @@ export function TextScramble({
   const reduceMotion = useReducedMotion();
   const [active, setActive] = useState(false);
   const [displayText, setDisplayText] = useState(() => scrambleText(text, 0));
-
-  const durationMs = useMemo(() => Math.max(500, Math.min(1100, text.length * 38)), [text]);
+  const durationMs = Math.max(500, Math.min(1100, text.length * 38));
 
   useEffect(() => {
-    if (!trigger) return;
-    if (!active) return;
+    if (!trigger) {
+      setActive(false);
+      setDisplayText(text);
+      return;
+    }
+
+    setActive(false);
+    setDisplayText(scrambleText(text, 0));
+  }, [text, trigger]);
+
+  useEffect(() => {
+    if (!trigger || !active) return;
 
     if (reduceMotion) {
       setDisplayText(text);
@@ -60,17 +85,6 @@ export function TextScramble({
 
     return () => window.clearInterval(timer);
   }, [active, durationMs, reduceMotion, text, trigger]);
-
-  useEffect(() => {
-    if (!trigger) {
-      setActive(false);
-      setDisplayText(text);
-      return;
-    }
-
-    setActive(false);
-    setDisplayText(scrambleText(text, 0));
-  }, [text, trigger]);
 
   return (
     <motion.span
