@@ -24,6 +24,7 @@
     "@notionhq/client": "^2.2.16",
     "ai": "^5.0.0",
     "@ai-sdk/openai": "^2.0.0",
+    "@ai-sdk/react": "^3.0.143",
     "@supabase/supabase-js": "^2.49.0"
   },
   "devDependencies": {
