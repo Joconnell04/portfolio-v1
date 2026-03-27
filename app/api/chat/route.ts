@@ -22,14 +22,12 @@ function getLatestUserQuery(messages: UIMessage[]): string {
     const msg = messages[i];
     if (msg.role !== "user") continue;
 
-    // AI SDK v5: message parts live on msg.parts
     const withParts = msg as UIMessage & { parts?: AnyPart[] };
     if (Array.isArray(withParts.parts) && withParts.parts.length > 0) {
       const text = extractTextFromParts(withParts.parts);
       if (text) return text;
     }
 
-    // Fallback: some serialisation formats keep a top-level content string
     const withContent = msg as UIMessage & { content?: string };
     if (typeof withContent.content === "string" && withContent.content.trim()) {
       return withContent.content.trim();
@@ -61,7 +59,7 @@ export async function POST(request: Request) {
     maxOutputTokens: 900,
   });
 
-  return result.toDataStreamResponse({
+  return result.toUIMessageStreamResponse({
     headers: {
       "Cache-Control": "no-store",
     },
