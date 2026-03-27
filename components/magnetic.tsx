@@ -5,7 +5,6 @@ import {
   useMotionValue,
   useReducedMotion,
   useSpring,
-  type MotionProps,
 } from "framer-motion";
 import { type ButtonHTMLAttributes, type HTMLAttributes, type PointerEvent as ReactPointerEvent, useRef } from "react";
 import { cn } from "@/lib/utils";
