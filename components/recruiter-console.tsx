@@ -29,6 +29,12 @@ type ChatMessage = UIMessage & {
 const STORAGE_KEY = "recruiter-access-profile";
 const NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;
 
+const SOCIAL_LINKS = [
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/jackson-t-oconnell/", ariaLabel: "Jackson O'Connell on LinkedIn" },
+  { label: "GitHub", href: "https://github.com/Joconnell04", ariaLabel: "Jackson O'Connell on GitHub" },
+  { label: "All3DP", href: "https://all3dp.com/authors/jacksonoconnell/", ariaLabel: "Jackson O'Connell author page on All3DP" },
+] as const;
+
 function extractMessageText(message: ChatMessage) {
   if (typeof message.content === "string" && message.content.trim()) {
     return message.content;
@@ -255,6 +261,38 @@ export function RecruiterConsole({
 
         <ProjectsSection projects={projects} />
         <GitHubActivityHeatmap heatmap={heatmap} />
+
+        <motion.footer
+          className="mx-auto w-full max-w-7xl px-4 pb-32 pt-2 sm:px-6 sm:pb-36 lg:px-8"
+          initial="hidden"
+          whileInView="visible"
+          viewport={viewportOnce}
+          variants={fadeUpContainer}
+        >
+          <motion.div
+            variants={fadeUpItem}
+            className="flex flex-col gap-4 rounded-3xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div>
+              <div className="text-xs uppercase tracking-[0.3em] text-white/35">Portfolio links</div>
+              <p className="mt-1 text-sm text-white/60">Open in a new tab for quick reference during recruiting.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {SOCIAL_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  aria-label={link.ariaLabel}
+                  className="rounded-full border border-white/10 bg-black/30 px-4 py-2 text-sm text-white/75 transition hover:border-emerald-400/30 hover:bg-emerald-400/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        </motion.footer>
       </main>
 
       <motion.aside
