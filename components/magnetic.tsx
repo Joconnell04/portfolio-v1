@@ -3,11 +3,11 @@
 import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 import type { HTMLMotionProps, Variants } from "framer-motion";
 import {
-  type ButtonHTMLAttributes,
-  type HTMLAttributes,
-  type PointerEvent as ReactPointerEvent,
   type ComponentType,
+  type PointerEvent as ReactPointerEvent,
+  useEffect,
   useRef,
+  useState,
 } from "react";
 import { cn } from "@/lib/utils";
 
@@ -23,13 +23,31 @@ const MotionButton = motion.button as unknown as ComponentType<any>;
 function useMagneticMotion<T extends HTMLElement>(strength: number) {
   const ref = useRef<T | null>(null);
   const reduceMotion = useReducedMotion();
+  const [isFinePointer, setIsFinePointer] = useState(false);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const springX = useSpring(x, { stiffness: 260, damping: 22, mass: 0.18 });
   const springY = useSpring(y, { stiffness: 260, damping: 22, mass: 0.18 });
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const query = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const update = () => setIsFinePointer(query.matches);
+
+    update();
+
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", update);
+      return () => query.removeEventListener("change", update);
+    }
+
+    query.addListener(update);
+    return () => query.removeListener(update);
+  }, []);
+
   function setTarget(event: ReactPointerEvent<T>) {
-    if (reduceMotion) return;
+    if (reduceMotion || !isFinePointer || event.pointerType !== "mouse") return;
 
     const element = ref.current;
     if (!element) return;
@@ -50,9 +68,10 @@ function useMagneticMotion<T extends HTMLElement>(strength: number) {
   return {
     ref,
     style: { x: springX, y: springY },
-    onPointerMove: setTarget,
-    onPointerLeave: reset,
+    onPointerMove: isFinePointer ? setTarget : undefined,
+    onPointerLeave: isFinePointer ? reset : undefined,
     reduceMotion,
+    isFinePointer,
   };
 }
 
@@ -70,7 +89,7 @@ export function MagneticCard({
       style={magnetic.style}
       onPointerMove={magnetic.onPointerMove}
       onPointerLeave={magnetic.onPointerLeave}
-      whileHover={magnetic.reduceMotion ? undefined : { scale: 1.01 }}
+      whileHover={magnetic.reduceMotion || !magnetic.isFinePointer ? undefined : { scale: 1.01 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className={cn("will-change-transform", className)}
       {...(props as any)}
@@ -96,8 +115,8 @@ export function MagneticButton({
       style={magnetic.style}
       onPointerMove={magnetic.onPointerMove}
       onPointerLeave={magnetic.onPointerLeave}
-      whileHover={magnetic.reduceMotion ? undefined : { scale: 1.02 }}
-      whileTap={magnetic.reduceMotion ? undefined : { scale: 0.98 }}
+      whileHover={magnetic.reduceMotion || !magnetic.isFinePointer ? undefined : { scale: 1.02 }}
+      whileTap={magnetic.reduceMotion || !magnetic.isFinePointer ? undefined : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 280, damping: 24 }}
       className={cn("will-change-transform", className)}
       {...(props as any)}
