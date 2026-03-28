@@ -27,19 +27,38 @@ const EXPERIENCES = [
   },
 ] as const;
 
+const SUMMARY_CARDS = [
+  { label: "Focus", value: "analytics + automation" },
+  { label: "Scope", value: "business + technical teams" },
+  { label: "Format", value: "measurable outcomes" },
+] as const;
+
 export default function ExperiencePage() {
   return (
-    <PortfolioRouteShell eyebrow="professional" title="Professional" description="">
-      <section className="grid gap-5">
+    <PortfolioRouteShell
+      eyebrow="professional"
+      title="Professional experience"
+      description="Role snapshots, scope, and measurable outcomes across analytics, ML, and automation."
+    >
+      <section className="grid gap-4 md:grid-cols-3">
+        {SUMMARY_CARDS.map((card) => (
+          <div key={card.label} className="hud-window bg-black p-4 sm:p-5">
+            <div className="text-[11px] uppercase tracking-[0.3em] text-white/40">{card.label}</div>
+            <div className="mt-3 text-lg uppercase tracking-[0.16em] text-[#f3fff6]">{card.value}</div>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-5 grid gap-5">
         {EXPERIENCES.map((item, index) => (
           <article
             key={item.company}
             className="hud-window overflow-hidden border border-white/10 bg-black"
             style={{ boxShadow: `16px 16px 0 ${item.accent}` }}
           >
-            <div className="grid md:grid-cols-[240px_minmax(0,1fr)]">
+            <div className="grid md:grid-cols-[260px_minmax(0,1fr)]">
               <div className="border-b border-white/10 bg-[#050505] md:border-b-0 md:border-r md:border-white/10">
-                <div className="flex h-full min-h-[200px] flex-col justify-between p-5 sm:p-6">
+                <div className="flex h-full min-h-[220px] flex-col justify-between p-5 sm:p-6">
                   <div className="flex items-start gap-4">
                     <div
                       className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/15 bg-black text-2xl text-white"
@@ -52,6 +71,7 @@ export default function ExperiencePage() {
                       <h2 className="mt-2 text-xl uppercase tracking-[0.16em] text-white sm:text-2xl">
                         {item.company}
                       </h2>
+                      <div className="mt-3 text-[11px] uppercase tracking-[0.28em] text-white/45">Professional section</div>
                     </div>
                   </div>
 
