@@ -41,6 +41,34 @@ function normalizeId(row: PortfolioEmbeddingRow, index: number) {
   return String(row.id ?? index + 1);
 }
 
+async function queryPortfolioEmbeddings(queryEmbedding: number[], limit: number) {
+  const supabase = createRecruiterSupabaseClient();
+
+  if (!supabase) {
+    return [] as PortfolioEmbeddingRow[];
+  }
+
+  const rpcResult = await supabase.rpc("match_portfolio_embeddings", {
+    query_embedding: queryEmbedding,
+    match_count: limit,
+  });
+
+  if (!rpcResult.error && Array.isArray(rpcResult.data)) {
+    return rpcResult.data as PortfolioEmbeddingRow[];
+  }
+
+  const fallback = await supabase
+    .from("portfolio_embeddings")
+    .select("*")
+    .limit(limit);
+
+  if (fallback.error || !Array.isArray(fallback.data)) {
+    return [] as PortfolioEmbeddingRow[];
+  }
+
+  return fallback.data as PortfolioEmbeddingRow[];
+}
+
 export async function searchPortfolioEmbeddings(query: string, limit = 6): Promise<RecruiterMatch[]> {
   const trimmedQuery = query.trim();
   if (!trimmedQuery) {
@@ -48,30 +76,28 @@ export async function searchPortfolioEmbeddings(query: string, limit = 6): Promi
   }
 
   if (!process.env.OPENAI_API_KEY) {
-    throw new Error("Missing OPENAI_API_KEY for recruiter retrieval");
+    return [];
   }
 
-  const { embedding } = await embed({
-    model: openai.embedding(process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small"),
-    value: trimmedQuery,
-  });
+  try {
+    const { embedding } = await embed({
+      model: openai.embedding(process.env.OPENAI_EMBEDDING_MODEL ?? "text-embedding-3-small"),
+      value: trimmedQuery,
+    });
 
-  const supabase = createRecruiterSupabaseClient();
-  const { data, error } = await supabase.rpc("match_portfolio_embeddings", {
-    query_embedding: embedding,
-    match_count: limit,
-  });
+    const rows = await queryPortfolioEmbeddings(embedding, limit);
 
-  if (error) {
-    throw new Error("Failed to query portfolio_embeddings: " + error.message);
+    return rows
+      .map((row, index) => ({
+        id: normalizeId(row, index),
+        content: normalizeContent(row),
+        metadata: normalizeMetadata(row.metadata),
+        similarity: normalizeSimilarity(row),
+      }))
+      .filter((row) => row.content.length > 0);
+  } catch {
+    return [];
   }
-
-  return ((data as PortfolioEmbeddingRow[] | null | undefined) ?? []).map((row, index) => ({
-    id: normalizeId(row, index),
-    content: normalizeContent(row),
-    metadata: normalizeMetadata(row.metadata),
-    similarity: normalizeSimilarity(row),
-  })).filter((row) => row.content.length > 0);
 }
 
 export async function buildRecruiterContext(query: string, limit = 6) {
@@ -84,7 +110,11 @@ export async function buildRecruiterContext(query: string, limit = 6) {
   return matches
     .map((match, index) => {
       const metadata = match.metadata ? JSON.stringify(match.metadata) : "{}";
-      return (index + 1) + ". similarity=" + match.similarity.toFixed(3) + "\ncontent: " + match.content + "\nmetadata: " + metadata;
+      return (index + 1) + ". similarity=" + match.similarity.toFixed(3) + "
+content: " + match.content + "
+metadata: " + metadata;
     })
-    .join("\n\n");
+    .join("
+
+");
 }
