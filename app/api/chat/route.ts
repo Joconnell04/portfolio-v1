@@ -38,30 +38,41 @@ function getLatestUserQuery(messages: UIMessage[]): string {
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const messages = (body.messages ?? []) as UIMessage[];
-  const latestQuery = getLatestUserQuery(messages);
-  const retrievedContext = latestQuery
-    ? await buildRecruiterContext(latestQuery)
-    : "No relevant evidence was retrieved from the experience graph.";
+  try {
+    const body = await request.json();
+    const messages = (body.messages ?? []) as UIMessage[];
+    const latestQuery = getLatestUserQuery(messages);
+    const retrievedContext = latestQuery
+      ? await buildRecruiterContext(latestQuery)
+      : "No relevant evidence was retrieved from the experience graph.";
 
-  const model = openai(process.env.OPENAI_MODEL ?? "gpt-4.1-mini");
-  const result = streamText({
-    model,
-    system: [
-      RECRUITER_AGENT_PROMPT,
-      "",
-      "Retrieved evidence from the experience graph:",
-      retrievedContext,
-    ].join("\n"),
-    messages: await convertToModelMessages(messages),
-    temperature: 0.2,
-    maxOutputTokens: 900,
-  });
+    const model = openai(process.env.OPENAI_MODEL ?? "gpt-4.1-mini");
+    const result = streamText({
+      model,
+      system: [
+        RECRUITER_AGENT_PROMPT,
+        "",
+        "Retrieved evidence from the experience graph:",
+        retrievedContext,
+      ].join("
+"),
+      messages: await convertToModelMessages(messages),
+      temperature: 0.2,
+      maxOutputTokens: 900,
+    });
 
-  return result.toUIMessageStreamResponse({
-    headers: {
-      "Cache-Control": "no-store",
-    },
-  });
+    return result.toUIMessageStreamResponse({
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    console.error("/api/chat failed", error);
+    return Response.json(
+      {
+        error: "Unable to load recruiter chat right now.",
+      },
+      { status: 200 }
+    );
+  }
 }
