@@ -7,6 +7,7 @@ const ROUTES = [
   { href: "/projects", label: "Projects" },
   { href: "/experience", label: "Experience" },
   { href: "/writing", label: "Writing" },
+  { href: "/travel", label: "Travel" },
 ] as const;
 
 export function PortfolioRouteShell({

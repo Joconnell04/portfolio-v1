@@ -92,6 +92,7 @@ export function MagneticCard({
       whileHover={magnetic.reduceMotion || !magnetic.isFinePointer ? undefined : { scale: 1.01 }}
       transition={{ type: "spring", stiffness: 260, damping: 22 }}
       className={cn("will-change-transform", className)}
+      inherit={false}
       {...(props as any)}
     >
       {children}
@@ -119,6 +120,7 @@ export function MagneticButton({
       whileTap={magnetic.reduceMotion || !magnetic.isFinePointer ? undefined : { scale: 0.98 }}
       transition={{ type: "spring", stiffness: 280, damping: 24 }}
       className={cn("will-change-transform", className)}
+      inherit={false}
       {...(props as any)}
     >
       {children}

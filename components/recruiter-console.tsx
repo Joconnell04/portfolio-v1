@@ -26,7 +26,7 @@ type ChatMessage = UIMessage & {
 };
 
 const STORAGE_KEY = "recruiter-access-profile";
-const NAV_ITEMS = ["Overview", "Projects", "Experience", "Contact"] as const;
+const NAV_ITEMS = ["Overview", "Projects", "Experience", "Travel", "Contact"] as const;
 const BOOT_LINES = ["booting shell", "assembling neon frame", "loading chat tunnel", "aligning project windows"] as const;
 
 const SOCIAL_LINKS = [
