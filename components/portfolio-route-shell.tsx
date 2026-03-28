@@ -18,7 +18,7 @@ export function PortfolioRouteShell({
 }: {
   eyebrow: string;
   title: string;
-  description: string;
+  description?: string;
   children: ReactNode;
 }) {
   return (
@@ -31,7 +31,7 @@ export function PortfolioRouteShell({
               <h1 className="text-3xl font-semibold uppercase tracking-[0.24em] text-[#f3fff6] sm:text-4xl">
                 {title}
               </h1>
-              <p className="max-w-2xl text-sm leading-6 text-[#a6ffbf] sm:text-base">{description}</p>
+              {description ? <p className="max-w-2xl text-sm leading-6 text-[#a6ffbf] sm:text-base">{description}</p> : null}
             </div>
             <nav className="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.24em] text-[#8bffbc]">
               {ROUTES.map((route) => (

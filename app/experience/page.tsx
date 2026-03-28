@@ -1,36 +1,88 @@
 import { PortfolioRouteShell } from "@/components/portfolio-route-shell";
 
-const EXPERIENCE = [
+const EXPERIENCES = [
   {
-    title: "Systems and automation",
-    body: "Transforms messy workflows into structured data, repeatable automations, and dashboards that stakeholders can actually use.",
+    company: "Delta Air Lines",
+    badge: "✈️",
+    accent: "#00e5ff",
+    summary:
+      "Data strategy and automation at Delta. Built ETL pipelines for flight incidents and Power BI dashboards tracking $8M in labor savings. Optimized pilot payroll and scaled reporting systems for 1,000+ users.",
+    details: ["ETL pipelines", "Power BI", "pilot payroll", "1,000+ users"],
   },
   {
-    title: "Frontend product work",
-    body: "Builds sharp, high-contrast interfaces in Next.js with Framer Motion and accessibility-minded layout decisions.",
+    company: "Equifax",
+    badge: "🧠",
+    accent: "#f7ff00",
+    summary:
+      "Machine learning research at Equifax. Developing transformer-based credit risk models and exploring model interpretability using BERT and TensorFlow.",
+    details: ["transformer models", "BERT", "TensorFlow", "credit risk"],
   },
   {
-    title: "Technical writing",
-    body: "Turns deep 3D-printing and hardware knowledge into clear editorial pieces for broad audiences.",
-  },
-  {
-    title: "Recruiter-facing storytelling",
-    body: "Shapes portfolio content so hiring teams can move from first glance to relevant evidence without hunting.",
+    company: "Georgia Tech (Scheller)",
+    badge: "🏫",
+    accent: "#00ff87",
+    summary:
+      "Automation specialist at Scheller. Mapping HR workflows and implementing Smartsheet systems to eliminate manual bottlenecks in the onboarding process.",
+    details: ["HR workflows", "Smartsheet", "onboarding", "automation"],
   },
 ] as const;
 
 export default function ExperiencePage() {
   return (
-    <PortfolioRouteShell
-      eyebrow="experience"
-      title="How I work"
-      description="A concise snapshot of the skills, patterns, and operating style behind the portfolio."
-    >
-      <section className="grid gap-4 md:grid-cols-2">
-        {EXPERIENCE.map((item) => (
-          <article key={item.title} className="hud-window rounded-none border border-[#00ff87]/40 bg-black p-5 shadow-[10px_10px_0_rgba(0,229,255,0.15)]">
-            <div className="text-xs uppercase tracking-[0.28em] text-[#84ffb1]">{item.title}</div>
-            <p className="mt-3 text-sm leading-6 text-[#d7ffe1]">{item.body}</p>
+    <PortfolioRouteShell eyebrow="professional" title="Professional" description="">
+      <section className="grid gap-5">
+        {EXPERIENCES.map((item, index) => (
+          <article
+            key={item.company}
+            className="hud-window overflow-hidden border border-white/10 bg-black"
+            style={{ boxShadow: `16px 16px 0 ${item.accent}` }}
+          >
+            <div className="grid md:grid-cols-[240px_minmax(0,1fr)]">
+              <div className="border-b border-white/10 bg-[#050505] md:border-b-0 md:border-r md:border-white/10">
+                <div className="flex h-full min-h-[200px] flex-col justify-between p-5 sm:p-6">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="flex h-16 w-16 shrink-0 items-center justify-center border border-white/15 bg-black text-2xl text-white"
+                      style={{ boxShadow: `8px 8px 0 ${item.accent}` }}
+                    >
+                      {item.badge}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[11px] uppercase tracking-[0.35em] text-white/40">{String(index + 1).padStart(2, "0")}</div>
+                      <h2 className="mt-2 text-xl uppercase tracking-[0.16em] text-white sm:text-2xl">
+                        {item.company}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.28em] text-white/45">
+                    {item.details.map((detail) => (
+                      <span key={detail} className="border border-white/10 bg-black px-2 py-1 text-white/70">
+                        {detail}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-5 p-5 sm:p-6">
+                <p className="max-w-4xl text-sm leading-7 text-white/82 sm:text-[15px]">{item.summary}</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="border border-white/10 bg-white/[0.03] px-3 py-3 text-[10px] uppercase tracking-[0.24em] text-white/45">
+                    <div className="text-white/70">Company</div>
+                    <div className="mt-2 text-white">{item.company}</div>
+                  </div>
+                  <div className="border border-white/10 bg-white/[0.03] px-3 py-3 text-[10px] uppercase tracking-[0.24em] text-white/45">
+                    <div className="text-white/70">Format</div>
+                    <div className="mt-2 text-white">Brutalist blocks</div>
+                  </div>
+                  <div className="border border-white/10 bg-white/[0.03] px-3 py-3 text-[10px] uppercase tracking-[0.24em] text-white/45">
+                    <div className="text-white/70">Surface</div>
+                    <div className="mt-2 text-white">Experience route</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </article>
         ))}
       </section>
