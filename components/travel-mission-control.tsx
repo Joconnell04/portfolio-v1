@@ -92,7 +92,7 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const destroy = createGlobe(
+    const globe = createGlobe(
       canvasRef.current,
       {
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
@@ -121,7 +121,7 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
     );
 
     return () => {
-      destroy();
+      globe.destroy();
     };
   }, [markers]);
 
