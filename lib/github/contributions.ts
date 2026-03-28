@@ -49,12 +49,14 @@ function toHeatmapFromCells(username: string, cells: ContributionCell[]): Contri
       columns: columns.sort((left, right) => left.y - right.y),
     }));
 
+  const lastUpdated = cells.reduce((latest, cell) => (cell.date > latest ? cell.date : latest), cells[0].date);
+
   return {
     username,
     profileUrl: `https://github.com/${username}`,
     totalContributions: cells.reduce((sum, cell) => sum + cell.count, 0),
     weeks,
-    lastUpdated: cells[cells.length - 1]?.date ?? new Date().toISOString(),
+    lastUpdated,
   };
 }
 
@@ -65,12 +67,12 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
   }
 
   try {
-    const response = await fetch("https://api.github.com/graphql", {
-      method: "POST",
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
       headers: {
         authorization: `Bearer ${token}`,
-        "content-type": "application/json",
-        "user-agent": "portfolio-v1",
+        'content-type': 'application/json',
+        'user-agent': 'portfolio-v1',
       },
       body: JSON.stringify({
         query: `query($login: String!) {
@@ -91,7 +93,7 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
         }`,
         variables: { login: username },
       }),
-      cache: "no-store",
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -121,7 +123,16 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
 
     weeks.forEach((week, x) => {
       (week.contributionDays ?? []).forEach((day, y) => {
-        const level = day.contributionLevel === "FOURTH_QUARTILE" ? 4 : day.contributionLevel === "THIRD_QUARTILE" ? 3 : day.contributionLevel === "SECOND_QUARTILE" ? 2 : day.contributionLevel === "FIRST_QUARTILE" ? 1 : 0;
+        const level =
+          day.contributionLevel === 'FOURTH_QUARTILE'
+            ? 4
+            : day.contributionLevel === 'THIRD_QUARTILE'
+              ? 3
+              : day.contributionLevel === 'SECOND_QUARTILE'
+                ? 2
+                : day.contributionLevel === 'FIRST_QUARTILE'
+                  ? 1
+                  : 0;
         cells.push({
           date: day.date ?? new Date().toISOString().slice(0, 10),
           count: day.contributionCount ?? 0,
@@ -138,7 +149,6 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
   }
 }
 
-
 function levelFromCount(count: number) {
   if (count >= 20) return 4;
   if (count >= 10) return 3;
@@ -149,25 +159,48 @@ function levelFromCount(count: number) {
 
 async function fetchPublicRepoCommitHeatmap(username: string): Promise<ContributionHeatmap | null> {
   try {
-    const response = await fetch(`https://api.github.com/repos/${username}/portfolio-v1/commits?author=${username}&per_page=100`, {
-      headers: {
-        "user-agent": "portfolio-v1",
-        accept: "application/vnd.github+json",
-      },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    const commits = (await response.json()) as { commit?: { author?: { date?: string } } }[];
     const counts = new Map<string, number>();
+    const since = new Date();
+    since.setUTCDate(since.getUTCDate() - 365);
+    since.setUTCHours(0, 0, 0, 0);
 
-    for (const commit of commits) {
-      const date = commit.commit?.author?.date?.slice(0, 10);
-      if (!date) continue;
-      counts.set(date, (counts.get(date) ?? 0) + 1);
+    const baseUrl =
+      'https://api.github.com/repos/' +
+      username +
+      '/portfolio-v1/commits?author=' +
+      username +
+      '&since=' +
+      since.toISOString() +
+      '&per_page=100';
+
+    for (let page = 1; page <= 10; page += 1) {
+      const response = await fetch(baseUrl + '&page=' + page, {
+        headers: {
+          'user-agent': 'portfolio-v1',
+          accept: 'application/vnd.github+json',
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        return null;
+      }
+
+      const commits = (await response.json()) as { commit?: { author?: { date?: string } } }[];
+
+      if (commits.length === 0) {
+        break;
+      }
+
+      for (const commit of commits) {
+        const date = commit.commit?.author?.date?.slice(0, 10);
+        if (!date) continue;
+        counts.set(date, (counts.get(date) ?? 0) + 1);
+      }
+
+      if (commits.length < 100) {
+        break;
+      }
     }
 
     const end = new Date();
@@ -207,9 +240,9 @@ async function fetchScrapedHeatmap(username: string): Promise<ContributionHeatma
   try {
     const response = await fetch(`https://github.com/users/${username}/contributions`, {
       headers: {
-        "user-agent": "Mozilla/5.0",
+        'user-agent': 'Mozilla/5.0',
       },
-      cache: "no-store",
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -221,15 +254,15 @@ async function fetchScrapedHeatmap(username: string): Promise<ContributionHeatma
     const cells: ContributionCell[] = [];
 
     for (const rectTag of rectTags) {
-      const date = getAttribute(rectTag, "data-date");
+      const date = getAttribute(rectTag, 'data-date');
       if (!date) continue;
 
       cells.push({
         date,
-        count: parseNumber(getAttribute(rectTag, "data-count")),
-        level: parseNumber(getAttribute(rectTag, "data-level")),
-        x: parseNumber(getAttribute(rectTag, "x")),
-        y: parseNumber(getAttribute(rectTag, "y")),
+        count: parseNumber(getAttribute(rectTag, 'data-count')),
+        level: parseNumber(getAttribute(rectTag, 'data-level')),
+        x: parseNumber(getAttribute(rectTag, 'x')),
+        y: parseNumber(getAttribute(rectTag, 'y')),
       });
     }
 
