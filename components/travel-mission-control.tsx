@@ -92,30 +92,33 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const destroy = createGlobe(canvasRef.current, {
-      devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
-      width: 1000,
-      height: 1000,
-      phi: rotationRef.current.phi,
-      theta: rotationRef.current.theta,
-      dark: 1,
-      diffuse: 1.35,
-      scale: 1.12,
-      mapSamples: 16000,
-      mapBrightness: 3.1,
-      baseColor: [0.02, 0.02, 0.03],
-      markerColor: [0, 1, 0.58],
-      glowColor: [0, 0.72, 1],
-      markers,
-      onRender: (state) => {
-        if (!rotationRef.current.dragging) {
-          rotationRef.current.phi += 0.0032;
-        }
+    const destroy = createGlobe(
+      canvasRef.current,
+      {
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        width: 1000,
+        height: 1000,
+        phi: rotationRef.current.phi,
+        theta: rotationRef.current.theta,
+        dark: 1,
+        diffuse: 1.35,
+        scale: 1.12,
+        mapSamples: 16000,
+        mapBrightness: 3.1,
+        baseColor: [0.02, 0.02, 0.03],
+        markerColor: [0, 1, 0.58],
+        glowColor: [0, 0.72, 1],
+        markers,
+        onRender: (state: any) => {
+          if (!rotationRef.current.dragging) {
+            rotationRef.current.phi += 0.0032;
+          }
 
-        state.phi = rotationRef.current.phi;
-        state.theta = rotationRef.current.theta;
-      },
-    });
+          state.phi = rotationRef.current.phi;
+          state.theta = rotationRef.current.theta;
+        },
+      } as any
+    );
 
     return () => {
       destroy();
@@ -187,7 +190,7 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
               actual travel history
             </div>
             <div className='absolute bottom-4 left-4 max-w-xs border border-white/10 bg-black/80 px-3 py-2 text-[11px] uppercase tracking-[0.28em] text-[#84ffb1]'>
-              {activeLocation.name} \u00B7 {activeLocation.visitLabel}
+              {activeLocation.name} · {activeLocation.visitLabel}
             </div>
           </div>
 
