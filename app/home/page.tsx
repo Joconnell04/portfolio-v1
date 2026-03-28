@@ -5,10 +5,10 @@ import { getPortfolioProjects } from "@/lib/supabase/portfolio-projects";
 export const dynamic = "force-dynamic";
 
 const introLines = [
-  "product-minded frontend",
-  "data-heavy storytelling",
-  "recruiter-ready surfaces",
-  "3D-printing editorial background",
+  "clear systems",
+  "usable motion",
+  "high-contrast layouts",
+  "3D-printing writing",
 ] as const;
 
 export default async function HomePage() {
@@ -25,11 +25,10 @@ export default async function HomePage() {
             <div className="max-w-3xl">
               <span className="bootline">home</span>
               <h1 className="mt-3 text-3xl font-semibold uppercase tracking-[0.2em] text-[#f3fff6] sm:text-4xl lg:text-5xl">
-                Hi, I&apos;m Jackson. I build portfolio systems that are clear, fast, and easy to scan.
+                I build portfolio systems that stay clear, fast, and easy to scan.
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-6 text-[#a6ffbf] sm:text-base">
-                This site is split into Home, Projects, Experience, Writing, and Travel so recruiters can jump directly to
-                the evidence that matters.
+                I split this site into Home, Projects, Experience, Writing, and Travel so people can jump straight to the evidence that matters.
               </p>
               <div className="mt-6 flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.24em] text-[#8bffbc]">
                 <a href="/projects" className="hud-button inline-flex items-center border border-[#00ff87]/60 bg-black px-3 py-2 text-[#ebfff1] transition hover:-translate-y-0.5">

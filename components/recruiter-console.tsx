@@ -27,12 +27,12 @@ type ChatMessage = UIMessage & {
 
 const STORAGE_KEY = "recruiter-access-profile";
 const NAV_ITEMS = ["Overview", "Projects", "Experience", "Travel", "Contact"] as const;
-const BOOT_LINES = ["booting shell", "assembling neon frame", "loading chat tunnel", "aligning project windows"] as const;
+const BOOT_LINES = ["booting shell", "assembling frame", "loading chat tunnel", "aligning project windows"] as const;
 
 const SOCIAL_LINKS = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/jackson-t-oconnell/", ariaLabel: "Jackson O'Connell on LinkedIn" },
-  { label: "GitHub", href: "https://github.com/Joconnell04", ariaLabel: "Jackson O'Connell on GitHub" },
-  { label: "All3DP", href: "https://all3dp.com/authors/jacksonoconnell/", ariaLabel: "Jackson O'Connell author page on All3DP" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/jackson-t-oconnell/", ariaLabel: "My LinkedIn profile" },
+  { label: "GitHub", href: "https://github.com/Joconnell04", ariaLabel: "My GitHub profile" },
+  { label: "All3DP", href: "https://all3dp.com/authors/jacksonoconnell/", ariaLabel: "My All3DP author page" },
 ] as const;
 
 function extractMessageText(message: ChatMessage) {
@@ -66,7 +66,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
         )}
       >
         <div className="mb-1 text-[11px] uppercase tracking-[0.22em] text-white/35">
-          {isUser ? "Recruiter" : "Jackson AI"}
+          {isUser ? "My question" : "My AI"}
         </div>
         {text}
       </div>
@@ -94,10 +94,10 @@ function AccessGate({
       }}
     >
       <div className="mb-3">
-        <TextScramble className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" text="Recruiter access" />
+        <TextScramble className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" text="My access" />
         <h2 className="mt-2 text-lg font-medium text-white">Identify yourself to continue</h2>
         <p className="mt-1 text-sm text-white/55">
-          Enter your name and company so the assistant can tailor the conversation for recruiting context.
+          Enter your name and company so I can tailor the conversation to you.
         </p>
       </div>
 
@@ -127,7 +127,7 @@ function AccessGate({
         disabled={disabled}
         className="hud-button mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#eaffef] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        Enter terminal
+        Enter the drawer
         <span aria-hidden>↵</span>
       </MagneticButton>
     </form>
@@ -182,7 +182,7 @@ export function RecruiterConsole({
 
   const openText = useMemo(() => {
     if (profile) return `${profile.name} @ ${profile.company}`;
-    return "access required";
+    return "locked";
   }, [profile]);
 
   const readyToSend = Boolean(profile?.name.trim() && profile?.company.trim());
@@ -218,9 +218,9 @@ export function RecruiterConsole({
           >
             <motion.div variants={fadeUpItem} inherit={false} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-white/45 sm:gap-3 sm:text-xs sm:tracking-[0.3em]">
               <span className="border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
-                recruiter console
+                personal ai
               </span>
-              <span>Jackson O’Connell</span>
+              <span>I</span>
               <span>experience graph</span>
             </motion.div>
 
@@ -236,12 +236,11 @@ export function RecruiterConsole({
 
             <motion.div variants={fadeUpItem} inherit={false} className="max-w-4xl">
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-6xl">
-                <TextScramble text="A terminal-style recruiter interface" />
-                <span className="block text-white/70">for fast, evidence-backed selling.</span>
+                <TextScramble text="I built a terminal-style drawer for quick, evidence-backed conversations." />
+                <span className="block text-white/70">It lets people ask questions and get concise answers from my work.</span>
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65 sm:mt-5 sm:text-base md:text-lg">
-                The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
-                Jackson&apos;s experience graph through the /api/chat stream.
+                I use the drawer below so people can identify themselves, ask questions, and get answers pulled from my experience graph through my chat endpoint.
               </p>
             </motion.div>
           </motion.header>
@@ -254,9 +253,9 @@ export function RecruiterConsole({
             variants={fadeUpContainer}
           >
             {[
-              "Tailwind layout with a terminal aesthetic",
-              "Framer Motion drawer transitions and polish",
-              "useChat-powered streaming conversation",
+              'I keep the layout sharp and readable',
+              'I use motion only where it helps',
+              'I stream answers from my own data',
             ].map((item) => (
               <motion.div
                 key={item}
@@ -283,13 +282,13 @@ export function RecruiterConsole({
           <motion.div
             variants={fadeUpItem}
             inherit={false}
-            className="hud-window flex flex-col gap-4 bg-black/90 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+            className="hud-window flex flex-col gap-6 bg-black/90 px-6 py-5 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <div className="text-xs uppercase tracking-[0.3em] text-white/35">Portfolio links</div>
-              <p className="mt-1 text-sm text-white/60">Open in a new tab for quick reference during recruiting.</p>
+              <div className="text-xs uppercase tracking-[0.3em] text-white/35">My links</div>
+              <p className="mt-1 text-sm text-white/60">I keep these open in a new tab for quick reference.</p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {SOCIAL_LINKS.map((link) => (
                 <a
                   key={link.label}
@@ -317,11 +316,12 @@ export function RecruiterConsole({
           <MagneticButton
             type="button"
             onClick={() => setDrawerOpen((value) => !value)}
+            aria-expanded={drawerOpen}
             className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"
           >
             <span className="flex items-center gap-3">
               <span className="h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-              <TextScramble className="font-medium text-white" text="Terminal drawer" />
+              <TextScramble className="font-medium text-white" text="Open my drawer" />
               <span className="text-white/35">{openText}</span>
             </span>
             <TextScramble
@@ -346,17 +346,16 @@ export function RecruiterConsole({
                       <div>
                         <TextScramble
                           className="text-xs uppercase tracking-[0.28em] text-emerald-300/70"
-                          text="Recruiter mode"
+                          text="Personal AI"
                         />
-                        <h2 className="mt-2 text-xl font-semibold text-white">Sell Jackson with evidence</h2>
+                        <h2 className="mt-2 text-xl font-semibold text-white">Sell me with evidence</h2>
                       </div>
                       <span className="border border-white/10 bg-black/80 px-3 py-1 text-xs text-white/55">
                         {readyToSend ? "connected" : "awaiting profile"}
                       </span>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-white/60">
-                      Ask for a pitch, role fit, resume bullets, or interview prep. The backend pulls relevant fragments
-                      from the portfolio embeddings table and streams the answer back to this drawer.
+                      Ask for a pitch, role fit, resume bullets, or interview prep. I pull relevant fragments from my portfolio data and stream the answer back here.
                     </p>
                   </div>
 
@@ -366,7 +365,7 @@ export function RecruiterConsole({
                       <div className="mt-2 font-medium">
                         {profile.name} at {profile.company}
                       </div>
-                      <div className="mt-1 text-emerald-50/70">This session is personalized for recruiting context.</div>
+                      <div className="mt-1 text-emerald-50/70">This session is personalized for my portfolio.</div>
                     </div>
                   ) : (
                     <AccessGate
@@ -387,8 +386,7 @@ export function RecruiterConsole({
                   <div ref={scrollRef} className="flex-1 min-h-0 space-y-3 overflow-y-auto overscroll-contain px-4 py-4 [WebkitOverflowScrolling:touch]">
                     {messages.length === 0 ? (
                       <div className="hud-window border-dashed border-white/10 bg-black/85 p-6 text-sm leading-6 text-[#9fffb7]">
-                        Start with a recruiting question. Example: “Give me a 30-second pitch for Jackson for a product
-                        role.”
+                        Start with a question about my work. Example: “Give me a 30-second pitch for me for a product role.”
                       </div>
                     ) : (
                       messages.map((message) => <MessageBubble key={message.id} message={message as ChatMessage} />)
@@ -407,7 +405,7 @@ export function RecruiterConsole({
                     className="border-t border-white/10 p-4"
                   >
                     <label className="mb-2 block text-xs uppercase tracking-[0.28em] text-white/35">
-                      Ask the recruiter agent
+                      Ask my assistant
                     </label>
                     <textarea
                       value={messageInput}
@@ -415,11 +413,11 @@ export function RecruiterConsole({
                       disabled={!profile || isBusy}
                       rows={3}
                       className="w-full resize-none border border-white/10 bg-black/85 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
-                      placeholder={profile ? "e.g. What makes Jackson strong for this role?" : "Complete the profile to chat"}
+                      placeholder={profile ? "e.g. What makes me strong for this role?" : "Complete the profile to chat"}
                     />
                     <div className="mt-3 flex items-center justify-between gap-3">
                       <p className="text-xs text-white/40">
-                        Powered by /api/chat and the portfolio_embeddings retrieval path.
+                        It pulls from my portfolio data.
                       </p>
                       <MagneticButton
                         type="submit"
