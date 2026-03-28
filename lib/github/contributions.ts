@@ -123,6 +123,11 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
 
     weeks.forEach((week, x) => {
       (week.contributionDays ?? []).forEach((day, y) => {
+        const date = day.date?.slice(0, 10);
+        if (!date) {
+          return;
+        }
+
         const level =
           day.contributionLevel === 'FOURTH_QUARTILE'
             ? 4
@@ -134,7 +139,7 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
                   ? 1
                   : 0;
         cells.push({
-          date: day.date ?? new Date().toISOString().slice(0, 10),
+          date,
           count: day.contributionCount ?? 0,
           level,
           x,
