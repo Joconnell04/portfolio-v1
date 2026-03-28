@@ -1,34 +1,6 @@
-import process from "node:process";
-
-const project = process.argv[2] ?? "portfolio-v1";
-
-const phases = {
-  architect: [
-    "define the desired outcome",
-    "list acceptance criteria and constraints",
-    "state any layout, motion, or accessibility guardrails",
-  ],
-  coder: [
-    "implement the smallest valid slice",
-    "keep strict TypeScript and narrow data contracts",
-    "avoid extra abstraction and unrelated cleanup",
-  ],
-  reviewer: [
-    "human-coded aesthetics",
-    "zero rounded corners",
-    "high-contrast",
-    "no redundant explanatory text",
-    "deliberate spacing, typography, and motion",
-    "accessible focus states and contrast",
-    "reject generic or slop UI",
-  ],
-} as const;
-
-console.log(`ClawdBot review loop for ${project}\n`);
-for (const [phase, items] of Object.entries(phases)) {
-  console.log(`${phase.toUpperCase()}:`);
-  for (const item of items) {
-    console.log(`- ${item}`);
-  }
-  console.log("");
+{
+  "code": 0,
+  "stdout": "type ReviewSurface = 'main' | 'recruiter' | 'ui';\n\ntype CreativeFrontendDesignerRole = {\n  id: 'creative-frontend-designer';\n  name: 'Creative Frontend Designer';\n  replaces: readonly ['generic formatting', 'architect'];\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg';\n  primaryFor: readonly ['portfolio-v1'];\n  surfaces: readonly ReviewSurface[];\n  systemPrompt: string;\n  style: readonly [\n    '3D brutalist',\n    'pitch black',\n    'high-contrast accents',\n    'blue for recruiter',\n    'neon/CRT for main',\n  ];\n  rules: readonly [\n    'Zero rounded corners',\n    'Sharp 90-degree edges',\n    '3D animated blocks',\n    'No redundant explanatory text',\n  ];\n  codeFormatting: readonly [\n    'Clean, minimalist, human-like',\n    'No AI-style comments',\n    'Strict TypeScript',\n    'Framer Motion best practices',\n  ];\n};\n\nexport const creativeFrontendDesigner = {\n  id: 'creative-frontend-designer',\n  name: 'Creative Frontend Designer',\n  replaces: ['generic formatting', 'architect'] as const,\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',\n  primaryFor: ['portfolio-v1'] as const,\n  surfaces: ['main', 'recruiter', 'ui'] as const,\n  systemPrompt: [\n    'You are the primary creative gatekeeper for portfolio-v1 UI work.',\n    'Style: 3D brutalist, pitch black, high-contrast accents.',\n    'Use blue accents for recruiter surfaces and neon/CRT accents for main surfaces.',\n    'Rules: zero rounded corners, sharp 90-degree edges, 3D animated blocks, no redundant explanatory text.',\n    'Code formatting: clean, minimalist, human-like, no AI-style comments, strict TypeScript, Framer Motion best practices.',\n    'Reject generic, templated, soft, or cluttered UI immediately.',\n  ].join(' '),\n  style: ['3D brutalist', 'pitch black', 'high-contrast accents', 'blue for recruiter', 'neon/CRT for main'] as const,\n  rules: ['Zero rounded corners', 'Sharp 90-degree edges', '3D animated blocks', 'No redundant explanatory text'] as const,\n  codeFormatting: ['Clean, minimalist, human-like', 'No AI-style comments', 'Strict TypeScript', 'Framer Motion best practices'] as const,\n} as const satisfies CreativeFrontendDesignerRole;\n\nexport const reviewLoopConfig = {\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',\n  primaryCreativeGatekeeper: creativeFrontendDesigner.id,\n  roles: [creativeFrontendDesigner],\n} as const;\n\nexport function resolvePrimaryCreativeGatekeeper(projectId: string, surface: ReviewSurface) {\n  if (projectId !== reviewLoopConfig.projectId) {\n    return null;\n  }\n\n  if (surface === 'main' || surface === 'recruiter' || surface === 'ui') {\n    return creativeFrontendDesigner;\n  }\n\n  return null;\n}\n\nif (import.meta.main) {\n  process.stdout.write(JSON.stringify(reviewLoopConfig, null, 2));\n  process.stdout.write('\n');\n}",
+  "stderr": "",
+  "durationMs": 53
 }
