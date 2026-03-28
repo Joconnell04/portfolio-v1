@@ -19,6 +19,8 @@ export type ContributionHeatmap = {
   lastUpdated: string;
 };
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 function getAttribute(tag: string, name: string) {
   const match = tag.match(new RegExp(`${name}="([^"]*)"`));
   return match?.[1] ?? null;
@@ -46,7 +48,7 @@ function toHeatmapFromCells(username: string, cells: ContributionCell[]): Contri
     .sort(([left], [right]) => left - right)
     .map(([x, columns]) => ({
       x,
-      columns: columns.sort((left, right) => left.y - right.y),
+      columns: columns.sort((left, right) => left.y - right.y || left.date.localeCompare(right.date)),
     }));
 
   const lastUpdated = cells.reduce((latest, cell) => (cell.date > latest ? cell.date : latest), cells[0].date);
@@ -165,9 +167,17 @@ function levelFromCount(count: number) {
 async function fetchPublicRepoCommitHeatmap(username: string): Promise<ContributionHeatmap | null> {
   try {
     const counts = new Map<string, number>();
-    const since = new Date();
-    since.setUTCDate(since.getUTCDate() - 365);
-    since.setUTCHours(0, 0, 0, 0);
+    const end = new Date();
+    end.setUTCHours(0, 0, 0, 0);
+
+    const start = new Date(end);
+    start.setUTCDate(start.getUTCDate() - 364);
+
+    const calendarStart = new Date(start);
+    calendarStart.setUTCDate(calendarStart.getUTCDate() - calendarStart.getUTCDay());
+
+    const dayCount = Math.floor((end.getTime() - calendarStart.getTime()) / MS_PER_DAY) + 1;
+    const weekCount = Math.ceil(dayCount / 7);
 
     const baseUrl =
       'https://api.github.com/repos/' +
@@ -175,7 +185,7 @@ async function fetchPublicRepoCommitHeatmap(username: string): Promise<Contribut
       '/portfolio-v1/commits?author=' +
       username +
       '&since=' +
-      since.toISOString() +
+      start.toISOString() +
       '&per_page=100';
 
     for (let page = 1; page <= 10; page += 1) {
@@ -208,18 +218,11 @@ async function fetchPublicRepoCommitHeatmap(username: string): Promise<Contribut
       }
     }
 
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    start.setDate(start.getDate() - 364);
-    const calendarStart = new Date(start);
-    calendarStart.setDate(calendarStart.getDate() - calendarStart.getDay());
-
     const cells: ContributionCell[] = [];
-    for (let week = 0; week < 53; week += 1) {
+    for (let week = 0; week < weekCount; week += 1) {
       for (let day = 0; day < 7; day += 1) {
         const current = new Date(calendarStart);
-        current.setDate(calendarStart.getDate() + week * 7 + day);
+        current.setUTCDate(calendarStart.getUTCDate() + week * 7 + day);
         if (current > end) {
           continue;
         }
