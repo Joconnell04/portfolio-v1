@@ -138,6 +138,71 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
   }
 }
 
+
+function levelFromCount(count: number) {
+  if (count >= 20) return 4;
+  if (count >= 10) return 3;
+  if (count >= 4) return 2;
+  if (count >= 1) return 1;
+  return 0;
+}
+
+async function fetchPublicRepoCommitHeatmap(username: string): Promise<ContributionHeatmap | null> {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${username}/portfolio-v1/commits?author=${username}&per_page=100`, {
+      headers: {
+        "user-agent": "portfolio-v1",
+        accept: "application/vnd.github+json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const commits = (await response.json()) as { commit?: { author?: { date?: string } } }[];
+    const counts = new Map<string, number>();
+
+    for (const commit of commits) {
+      const date = commit.commit?.author?.date?.slice(0, 10);
+      if (!date) continue;
+      counts.set(date, (counts.get(date) ?? 0) + 1);
+    }
+
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - 364);
+    const calendarStart = new Date(start);
+    calendarStart.setDate(calendarStart.getDate() - calendarStart.getDay());
+
+    const cells: ContributionCell[] = [];
+    for (let week = 0; week < 53; week += 1) {
+      for (let day = 0; day < 7; day += 1) {
+        const current = new Date(calendarStart);
+        current.setDate(calendarStart.getDate() + week * 7 + day);
+        if (current > end) {
+          continue;
+        }
+        const date = current.toISOString().slice(0, 10);
+        const count = counts.get(date) ?? 0;
+        cells.push({
+          date,
+          count,
+          level: levelFromCount(count),
+          x: week,
+          y: day,
+        });
+      }
+    }
+
+    return toHeatmapFromCells(username, cells);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchScrapedHeatmap(username: string): Promise<ContributionHeatmap | null> {
   try {
     const response = await fetch(`https://github.com/users/${username}/contributions`, {
@@ -175,5 +240,5 @@ async function fetchScrapedHeatmap(username: string): Promise<ContributionHeatma
 }
 
 export async function getGitHubContributionHeatmap(username: string): Promise<ContributionHeatmap | null> {
-  return (await fetchGraphQLHeatmap(username)) ?? (await fetchScrapedHeatmap(username));
+  return (await fetchGraphQLHeatmap(username)) ?? (await fetchScrapedHeatmap(username)) ?? (await fetchPublicRepoCommitHeatmap(username));
 }
