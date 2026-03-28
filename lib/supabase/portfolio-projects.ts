@@ -24,7 +24,6 @@ const FALLBACK_PROJECTS: PortfolioProject[] = [
     summary: "Recruiter-facing portfolio module that helps visitors explore relevant experience, ask questions, and get a tailored overview of Jackson's background.",
     segment: "Personal Projects",
     tags: ["Next.js", "Vercel AI SDK", "Supabase", "OpenAI"],
-    sourceUrl: "https://www.notion.so/33029338df99812a855af1d20fdf8d04",
   },
   {
     slug: "clawdbot-vitals",
@@ -32,7 +31,6 @@ const FALLBACK_PROJECTS: PortfolioProject[] = [
     summary: "A playful, terminal-style portfolio component that shows monthly API token usage and host health without exposing secrets.",
     segment: "Personal Projects",
     tags: ["Observability", "Terminal UI", "OpenClaw"],
-    sourceUrl: "https://www.notion.so/33129338df9981cc9f46c19bbece537a",
   },
   {
     slug: "all3dp-technical-writing",
@@ -40,7 +38,6 @@ const FALLBACK_PROJECTS: PortfolioProject[] = [
     summary: "Technical 3D-printing writing across printers, slicing, materials, and workflows.",
     segment: "Media / Writing",
     tags: ["3D Printing", "Editorial", "Search"],
-    sourceUrl: "https://www.notion.so/4c69ffd4a8c247ec9c108e4708d5fb40",
   },
   {
     slug: "3dsourced-technical-content",
@@ -48,7 +45,6 @@ const FALLBACK_PROJECTS: PortfolioProject[] = [
     summary: "Editorial work that complements All3DP and PrintingAtoms with technical, search-friendly coverage.",
     segment: "Media / Writing",
     tags: ["3D Printing", "Content Strategy", "Editorial"],
-    sourceUrl: "https://www.notion.so/7280b0e54307485b94ba5e43f5a73a3f",
   },
 ];
 
@@ -76,6 +72,30 @@ function toSlug(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function normalizeGitHubRepoUrl(value: string | null | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    if (host !== 'github.com' && host !== 'www.github.com') {
+      return undefined;
+    }
+
+    const segments = url.pathname.split('/').filter(Boolean);
+    if (segments.length !== 2) {
+      return undefined;
+    }
+
+    const [owner, repo] = segments;
+    return 'https://github.com/' + owner + '/' + repo;
+  } catch {
+    return undefined;
+  }
 }
 
 function summarizeDescription(projectName: string, description: string) {
@@ -117,6 +137,6 @@ export async function getPortfolioProjects(limit = 8): Promise<PortfolioProject[
     summary: summarizeDescription(row.project_name, row.description),
     segment: row.segment ?? undefined,
     tags: row.tags ?? [],
-    sourceUrl: row.source_url ?? undefined,
+    sourceUrl: normalizeGitHubRepoUrl(row.source_url),
   }));
 }
