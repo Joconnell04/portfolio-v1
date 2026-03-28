@@ -14,11 +14,13 @@ export function PortfolioRouteShell({
   eyebrow,
   title,
   description,
+  contentClassName,
   children,
 }: {
   eyebrow: string;
   title: string;
   description?: string;
+  contentClassName?: string;
   children: ReactNode;
 }) {
   return (
@@ -50,7 +52,7 @@ export function PortfolioRouteShell({
           </div>
         </header>
       </div>
-      <div className="mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">{children}</div>
+      <div className={cn("mx-auto w-full max-w-7xl px-4 pb-20 sm:px-6 lg:px-8", contentClassName)}>{children}</div>
     </div>
   );
 }
