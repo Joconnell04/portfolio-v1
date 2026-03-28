@@ -75,7 +75,7 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
       body: JSON.stringify({
         query: `query($login: String!) {
           user(login: $login) {
-            contributionsCollection {
+            contributionsCollection(includePrivate: true) {
               contributionCalendar {
                 totalContributions
                 weeks {
@@ -149,48 +149,25 @@ function levelFromCount(count: number) {
 
 async function fetchPublicRepoCommitHeatmap(username: string): Promise<ContributionHeatmap | null> {
   try {
+    const response = await fetch(`https://api.github.com/repos/${username}/portfolio-v1/commits?author=${username}&per_page=100`, {
+      headers: {
+        "user-agent": "portfolio-v1",
+        accept: "application/vnd.github+json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const commits = (await response.json()) as { commit?: { author?: { date?: string } } }[];
     const counts = new Map<string, number>();
-    const since = new Date();
-    since.setUTCDate(since.getUTCDate() - 365);
-    since.setUTCHours(0, 0, 0, 0);
 
-    const baseUrl =
-      'https://api.github.com/repos/' +
-      username +
-      '/portfolio-v1/commits?author=' +
-      username +
-      '&since=' +
-      since.toISOString() +
-      '&per_page=100';
-
-    for (let page = 1; page <= 10; page += 1) {
-      const response = await fetch(baseUrl + '&page=' + page, {
-        headers: {
-          'user-agent': 'portfolio-v1',
-          accept: 'application/vnd.github+json',
-        },
-        cache: 'no-store',
-      });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const commits = (await response.json()) as { commit?: { author?: { date?: string } } }[];
-
-      if (commits.length === 0) {
-        break;
-      }
-
-      for (const commit of commits) {
-        const date = commit.commit?.author?.date?.slice(0, 10);
-        if (!date) continue;
-        counts.set(date, (counts.get(date) ?? 0) + 1);
-      }
-
-      if (commits.length < 100) {
-        break;
-      }
+    for (const commit of commits) {
+      const date = commit.commit?.author?.date?.slice(0, 10);
+      if (!date) continue;
+      counts.set(date, (counts.get(date) ?? 0) + 1);
     }
 
     const end = new Date();
@@ -227,7 +204,6 @@ async function fetchPublicRepoCommitHeatmap(username: string): Promise<Contribut
 }
 
 async function fetchScrapedHeatmap(username: string): Promise<ContributionHeatmap | null> {
-
   try {
     const response = await fetch(`https://github.com/users/${username}/contributions`, {
       headers: {
