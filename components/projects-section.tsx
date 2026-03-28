@@ -81,17 +81,19 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
                       <TextScramble text={project.summary} />
                     </p>
 
-                    <div className='flex flex-wrap items-center justify-between gap-3 border-t border-[#00ff87]/30 pt-4 text-[11px] uppercase tracking-[0.28em] text-[#8cffb6]'>
-                      <span>3d pop / sharp edges / zero radius</span>
-                      <a
-                        href={project.sourceUrl!}
-                        target='_blank'
-                        rel='noreferrer noopener'
-                        className='hud-button inline-flex items-center px-4 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'
-                      >
-                        source
-                      </a>
-                    </div>
+                    {project.sourceUrl ? (
+                      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-[#00ff87]/30 pt-4 text-[11px] uppercase tracking-[0.28em] text-[#8cffb6]'>
+                        <span>3d pop / sharp edges / zero radius</span>
+                        <a
+                          href={project.sourceUrl}
+                          target='_blank'
+                          rel='noreferrer noopener'
+                          className='hud-button inline-flex items-center px-4 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'
+                        >
+                          source
+                        </a>
+                      </div>
+                    ) : null}
                   </div>
                 </motion.article>
               );
