@@ -46,10 +46,7 @@ export async function POST(request: Request) {
       ? await buildRecruiterContext(latestQuery)
       : "No relevant evidence was retrieved from the experience graph.";
 
-    const systemPrompt = RECRUITER_AGENT_PROMPT + "
-
-Retrieved evidence from the experience graph:
-" + retrievedContext;
+    const systemPrompt = RECRUITER_AGENT_PROMPT + " Retrieved evidence from the experience graph: " + retrievedContext;
 
     const model = openai(process.env.OPENAI_MODEL ?? "gpt-4.1-mini");
     const result = streamText({
