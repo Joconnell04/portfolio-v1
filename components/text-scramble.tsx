@@ -4,14 +4,24 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%*+_<>/\[]{}";
+const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#$%*+_<>/\\[]{}";
+
+const imul = typeof Math.imul === "function"
+  ? Math.imul
+  : (left: number, right: number) => {
+      const leftHigh = (left >>> 16) & 0xffff;
+      const leftLow = left & 0xffff;
+      const rightHigh = (right >>> 16) & 0xffff;
+      const rightLow = right & 0xffff;
+      return ((leftLow * rightLow) + ((((leftHigh * rightLow) + (leftLow * rightHigh)) << 16) >>> 0)) | 0;
+    };
 
 function hashString(value: string) {
   let hash = 2166136261;
 
   for (let index = 0; index < value.length; index += 1) {
     hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, 16777619);
+    hash = imul(hash, 16777619);
   }
 
   return hash >>> 0;
@@ -30,7 +40,7 @@ function scrambleText(source: string, progress: number) {
   return source
     .split("")
     .map((character, index) => {
-      if (/s/.test(character)) return character;
+      if (/\s/.test(character)) return character;
       if (index < revealCount) return character;
       return pickGlyph(source, index, phase);
     })
