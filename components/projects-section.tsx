@@ -10,6 +10,9 @@ import type { PortfolioProject } from '@/lib/supabase/portfolio-projects';
 const ACCENTS = ['#00ff87', '#00e5ff', '#f7ff00', '#ff4df8'] as const;
 
 export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) {
+  const visibleProjects = projects.filter((project) => Boolean(project.sourceUrl?.trim()));
+  const hiddenCount = projects.length - visibleProjects.length;
+
   return (
     <motion.section
       className='mx-auto w-full max-w-7xl px-4 pb-20 pt-10 sm:px-6 sm:pb-28 lg:px-8'
@@ -25,11 +28,11 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
             project huds
           </h2>
           <p className='mt-4 text-sm leading-6 text-[#a7ffbf]'>
-            Each project stays fixed in place with sharp geometry and a synthetic 3D pop.
+            Each project stays fixed in place with sharp geometry, a synthetic 3D pop, and a source link that stays visible.
           </p>
           <div className='mt-6 grid gap-2 text-[11px] uppercase tracking-[0.24em] text-[#84ffb1]'>
             <span className='hud-button inline-flex w-fit items-center px-3 py-2'>hover for glitch</span>
-            <span className='hud-button inline-flex w-fit items-center px-3 py-2'>source links included</span>
+            <span className='hud-button inline-flex w-fit items-center px-3 py-2'>source links enforced</span>
             <Link href='/projects' className='hud-button inline-flex w-fit items-center px-3 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'>
               View More
             </Link>
@@ -37,12 +40,12 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
         </div>
 
         <motion.div className='grid gap-5' variants={fadeUpContainer}>
-          {projects.length === 0 ? (
+          {visibleProjects.length === 0 ? (
             <motion.div variants={fadeUpItem} inherit={false} className='hud-window p-6 text-sm leading-6 text-[#a7ffbf]'>
               Project data is loading. Check the portfolio graph connection and refresh shortly.
             </motion.div>
           ) : (
-            projects.map((project, index) => {
+            visibleProjects.map((project, index) => {
               const accent = ACCENTS[index % ACCENTS.length];
               return (
                 <motion.article
@@ -81,18 +84,14 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
 
                     <div className='flex flex-wrap items-center justify-between gap-3 border-t border-[#00ff87]/30 pt-4 text-[11px] uppercase tracking-[0.28em] text-[#8cffb6]'>
                       <span>3d pop / sharp edges / zero radius</span>
-                      {project.sourceUrl ? (
-                        <a
-                          href={project.sourceUrl}
-                          target='_blank'
-                          rel='noreferrer noopener'
-                          className='hud-button inline-flex items-center px-4 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'
-                        >
-                          source
-                        </a>
-                      ) : (
-                        <span className='text-[#62d98c]'>source unavailable</span>
-                      )}
+                      <a
+                        href={project.sourceUrl!}
+                        target='_blank'
+                        rel='noreferrer noopener'
+                        className='hud-button inline-flex items-center px-4 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'
+                      >
+                        source
+                      </a>
                     </div>
                   </div>
                 </motion.article>
@@ -100,6 +99,13 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
             })
           )}
         </motion.div>
+
+        <div className='hud-window border border-white/10 bg-black/90 px-4 py-3 text-[11px] uppercase tracking-[0.26em] text-[#8cffb6] lg:col-span-2'>
+          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+            <span>source links stay visible on every public project card</span>
+            <span>{visibleProjects.length} visible / {projects.length} total{hiddenCount > 0 ? ' · ' + hiddenCount + ' hidden' : ''}</span>
+          </div>
+        </div>
       </motion.div>
     </motion.section>
   );
