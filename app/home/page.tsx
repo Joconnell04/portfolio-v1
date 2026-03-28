@@ -1,3 +1,4 @@
+import { ProjectsSection } from "@/components/projects-section";
 import { RecruiterConsole } from "@/components/recruiter-console";
 import { getGitHubContributionHeatmap } from "@/lib/github/contributions";
 import { getPortfolioProjects } from "@/lib/supabase/portfolio-projects";
@@ -46,12 +47,13 @@ export default async function HomePage() {
               </div>
             </div>
             <pre className="ascii-rain whitespace-pre-wrap text-right text-[11px] leading-4 text-[#00e5ff] sm:text-xs">
-{introLines.map((line, index) => `>${String(index + 1).padStart(2, "0")} ${line}`).join("\n")}
+{introLines.map((line, index) => '>' + String(index + 1).padStart(2, '0') + ' ' + line).join("\n")}
             </pre>
           </div>
         </div>
       </section>
 
+      <ProjectsSection projects={projects} />
       <RecruiterConsole projects={projects} heatmap={heatmap} />
     </div>
   );
