@@ -135,18 +135,18 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
 
   return (
     <motion.section
-      className='grid gap-6 lg:min-h-[78vh] lg:grid-cols-[minmax(0,1.4fr)_360px]'
+      className='grid gap-6 lg:min-h-[calc(100dvh-14rem)] lg:grid-cols-[minmax(0,1.65fr)_380px]'
       initial='hidden'
       whileInView='visible'
       viewport={viewportOnce}
       variants={fadeUpContainer}
     >
-      <motion.div variants={fadeUpItem} inherit={false} className='hud-window overflow-hidden border border-white/10 bg-black/95 p-5 sm:p-6'>
+      <motion.div variants={fadeUpItem} inherit={false} className='hud-window overflow-hidden border border-white/10 bg-black/95 p-5 sm:p-6 lg:min-h-[calc(100dvh-14rem)]'>
         <div className='flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between'>
           <div>
             <TextScramble text='coordinates' className='bootline' />
             <h2 className='mt-3 text-2xl font-semibold uppercase tracking-[0.2em] text-[#f3fff6] sm:text-3xl'>
-              Interactive globe
+              Full-page interactive globe
             </h2>
           </div>
           <div className='max-w-sm text-xs uppercase tracking-[0.24em] text-[#84ffb1]'>
@@ -154,9 +154,9 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
           </div>
         </div>
 
-        <div className='mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]'>
+        <div className='mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]'>
           <div
-            className='relative min-h-[60vh] overflow-hidden border border-[#00ff87]/40 bg-[radial-gradient(circle_at_50%_35%,rgba(0,255,135,0.16),rgba(0,0,0,0.98)_62%)]'
+            className='relative min-h-[72vh] overflow-hidden border border-[#00ff87]/40 bg-[radial-gradient(circle_at_50%_35%,rgba(0,255,135,0.16),rgba(0,0,0,0.98)_62%)]'
             onPointerDown={(event) => {
               rotationRef.current.dragging = true;
               rotationRef.current.startX = event.clientX;
@@ -187,14 +187,14 @@ export function TravelCoordinates({ locations }: { locations: TravelLocation[] }
             <div className='pointer-events-none absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-white/6' />
             <div className='pointer-events-none absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-white/6' />
             <div className='absolute left-4 top-4 border border-white/10 bg-black/75 px-3 py-2 text-[11px] uppercase tracking-[0.28em] text-white/50'>
-              actual travel history
+              full-page travel history
             </div>
             <div className='absolute bottom-4 left-4 max-w-xs border border-white/10 bg-black/80 px-3 py-2 text-[11px] uppercase tracking-[0.28em] text-[#84ffb1]'>
               {activeLocation.name} · {activeLocation.visitLabel}
             </div>
           </div>
 
-          <div className='space-y-4'>
+          <div className='space-y-4 lg:sticky lg:top-6'>
             <AnimatePresence mode='wait' initial={false}>
               <DestinationCard key={activeLocation.slug} location={activeLocation} />
             </AnimatePresence>
