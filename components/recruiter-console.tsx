@@ -317,16 +317,16 @@ export function RecruiterConsole({
             type="button"
             onClick={() => setDrawerOpen((value) => !value)}
             aria-expanded={drawerOpen}
-            className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5"
+            className="flex w-full items-center justify-between border-b border-white/10 px-4 py-3 text-left text-sm text-white/70 transition hover:bg-white/5 font-mono uppercase tracking-[0.18em]"
           >
-            <span className="flex items-center gap-3">
+            <span className="flex items-center gap-3"><span className="text-emerald-300">terminal</span>
               <span className="h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.8)]" />
-              <TextScramble className="font-medium text-white" text="Open my drawer" />
-              <span className="text-white/35">{openText}</span>
+              <TextScramble className="font-mono font-medium tracking-[0.18em] text-white" text="open drawer" />
+              <span className="font-mono text-white/35">{openText}</span>
             </span>
             <TextScramble
               className="text-xs uppercase tracking-[0.25em] text-white/40"
-              text={drawerOpen ? "collapse" : "expand"}
+              text={drawerOpen ? "close" : "enter"}
             />
           </MagneticButton>
 
