@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "seed:notion": "tsx scripts/seed-notion.ts"
+    "seed:notion": "tsx scripts/seed-notion.ts",
+    "review:portfolio": "tsx scripts/review-loop.ts"
   },
   "dependencies": {
     "next": "^15.3.0",
