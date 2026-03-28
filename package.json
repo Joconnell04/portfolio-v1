@@ -26,7 +26,8 @@
     "ai": "^5.0.0",
     "@ai-sdk/openai": "^2.0.0",
     "@ai-sdk/react": "^3.0.143",
-    "@supabase/supabase-js": "^2.49.0"
+    "@supabase/supabase-js": "^2.49.0",
+    "cobe": "^2.0.1"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
