@@ -77,8 +77,7 @@ section,
 header,
 footer,
 article,
-aside,
-div {
+aside {
   position: relative;
   z-index: 1;
 }
