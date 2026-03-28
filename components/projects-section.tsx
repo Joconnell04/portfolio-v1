@@ -17,7 +17,7 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
       viewport={viewportOnce}
       variants={fadeUpContainer}
     >
-      <motion.div variants={fadeUpItem} className="grid gap-6 border-t border-[#00ff87]/50 pt-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <motion.div variants={fadeUpItem} inherit={false} className="grid gap-6 border-t border-[#00ff87]/50 pt-8 lg:grid-cols-[280px_minmax(0,1fr)]">
         <div className="hud-window p-5 sm:p-6">
           <span className="bootline">selected windows</span>
           <h2 className="mt-4 max-w-xs text-2xl font-semibold uppercase tracking-[0.22em] text-[#f3fff6] sm:text-3xl">
@@ -35,8 +35,8 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
 
         <motion.div className="grid gap-5" variants={fadeUpContainer}>
           {projects.length === 0 ? (
-            <motion.div variants={fadeUpItem} className="hud-window p-6 text-sm leading-6 text-[#a7ffbf]">
-              No projects were returned from Supabase. The portfolio_embeddings query did not produce any rows.
+            <motion.div variants={fadeUpItem} inherit={false} className="hud-window p-6 text-sm leading-6 text-[#a7ffbf]">
+              Project data is loading. Check the portfolio graph connection and refresh shortly.
             </motion.div>
           ) : (
             projects.map((project, index) => {
@@ -45,6 +45,7 @@ export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) 
                 <motion.article
                   key={project.slug}
                   variants={fadeUpItem}
+                  inherit={false}
                   drag
                   dragElastic={0.08}
                   dragConstraints={{ left: -24, right: 24, top: -14, bottom: 14 }}

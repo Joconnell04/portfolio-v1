@@ -20,7 +20,6 @@ type RecruiterProfile = {
 };
 
 type RenderPart = { type: "text"; text: string } | { type: string; [key: string]: unknown };
-
 type ChatMessage = UIMessage & {
   content?: string;
   parts?: RenderPart[];
@@ -60,7 +59,7 @@ function MessageBubble({ message }: { message: ChatMessage }) {
     <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
       <div
         className={cn(
-          "max-w-[88%] whitespace-pre-wrap rounded-2xl border px-4 py-3 text-sm leading-6 shadow-lg",
+          "max-w-[88%] whitespace-pre-wrap border px-4 py-3 text-sm leading-6 shadow-lg",
           isUser
             ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-50"
             : "border-white/10 bg-white/5 text-white/80"
@@ -88,7 +87,7 @@ function AccessGate({
 }) {
   return (
     <form
-      className="hud-window rounded-none bg-black/95 p-4 backdrop-blur"
+      className="hud-window bg-black/95 p-4 backdrop-blur"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit(value);
@@ -108,7 +107,7 @@ function AccessGate({
           <input
             value={value.name}
             onChange={(event) => onChange({ ...value, name: event.target.value })}
-            className="rounded-none border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className="border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
             placeholder="Jordan Lee"
           />
         </label>
@@ -117,7 +116,7 @@ function AccessGate({
           <input
             value={value.company}
             onChange={(event) => onChange({ ...value, company: event.target.value })}
-            className="rounded-none border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
+            className="border border-white/10 bg-black/85 px-4 py-3 text-white outline-none transition focus:border-emerald-400/50"
             placeholder="Vertex Talent"
           />
         </label>
@@ -126,7 +125,7 @@ function AccessGate({
       <MagneticButton
         type="submit"
         disabled={disabled}
-        className="hud-button mt-4 inline-flex items-center gap-2 rounded-none px-4 py-2 text-sm font-medium text-[#eaffef] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+        className="hud-button mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#eaffef] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Enter terminal
         <span aria-hidden>↵</span>
@@ -217,7 +216,7 @@ export function RecruiterConsole({
             viewport={viewportOnce}
             variants={fadeUpContainer}
           >
-            <motion.div variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-white/45 sm:gap-3 sm:text-xs sm:tracking-[0.3em]">
+            <motion.div variants={fadeUpItem} inherit={false} className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-white/45 sm:gap-3 sm:text-xs sm:tracking-[0.3em]">
               <span className="border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-emerald-200/80">
                 recruiter console
               </span>
@@ -225,7 +224,7 @@ export function RecruiterConsole({
               <span>experience graph</span>
             </motion.div>
 
-            <motion.nav variants={fadeUpItem} className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/30 sm:text-[11px] sm:tracking-[0.3em]">
+            <motion.nav variants={fadeUpItem} inherit={false} className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-white/30 sm:text-[11px] sm:tracking-[0.3em]">
               {NAV_ITEMS.map((item) => (
                 <TextScramble
                   key={item}
@@ -235,14 +234,14 @@ export function RecruiterConsole({
               ))}
             </motion.nav>
 
-            <motion.div variants={fadeUpItem} className="max-w-4xl">
+            <motion.div variants={fadeUpItem} inherit={false} className="max-w-4xl">
               <h1 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-6xl">
                 <TextScramble text="A terminal-style recruiter interface" />
                 <span className="block text-white/70">for fast, evidence-backed selling.</span>
               </h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-white/65 sm:mt-5 sm:text-base md:text-lg">
                 The drawer below lets recruiters identify themselves, ask questions, and get concise answers pulled from
-                Jackson’s experience graph through the /api/chat stream.
+                Jackson&apos;s experience graph through the /api/chat stream.
               </p>
             </motion.div>
           </motion.header>
@@ -262,7 +261,8 @@ export function RecruiterConsole({
               <motion.div
                 key={item}
                 variants={fadeUpItem}
-                className="hud-window rounded-none bg-black/90 p-5 text-sm text-[#d7ffe1] backdrop-blur"
+                inherit={false}
+                className="hud-window bg-black/90 p-5 text-sm text-[#d7ffe1] backdrop-blur"
               >
                 {item}
               </motion.div>
@@ -282,7 +282,8 @@ export function RecruiterConsole({
         >
           <motion.div
             variants={fadeUpItem}
-            className="hud-window flex flex-col gap-4 rounded-none bg-black/90 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
+            inherit={false}
+            className="hud-window flex flex-col gap-4 bg-black/90 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <div className="text-xs uppercase tracking-[0.3em] text-white/35">Portfolio links</div>
@@ -340,7 +341,7 @@ export function RecruiterConsole({
                 className="grid gap-3 p-3 sm:p-4 lg:grid-cols-[340px_minmax(0,1fr)]"
               >
                 <div className="space-y-3">
-                  <div className="hud-window rounded-none bg-black/90 p-4">
+                  <div className="hud-window bg-black/90 p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <TextScramble
@@ -360,7 +361,7 @@ export function RecruiterConsole({
                   </div>
 
                   {profile ? (
-                    <div className="hud-window rounded-none bg-[#031109] p-4 text-sm text-[#adffbd]">
+                    <div className="hud-window bg-[#031109] p-4 text-sm text-[#adffbd]">
                       <div className="text-xs uppercase tracking-[0.28em] text-emerald-200/70">Access granted</div>
                       <div className="mt-2 font-medium">
                         {profile.name} at {profile.company}
@@ -388,7 +389,7 @@ export function RecruiterConsole({
                   )}
                 </div>
 
-                <div className="hud-window flex min-h-[420px] max-h-[calc(100dvh-10rem)] flex-col rounded-none bg-black/88">
+                <div className="hud-window flex min-h-[420px] max-h-[calc(100dvh-10rem)] flex-col bg-black/88">
                   <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs uppercase tracking-[0.28em] text-white/35">
                     <TextScramble text="chat session" />
                     <span>{status}</span>
@@ -424,7 +425,7 @@ export function RecruiterConsole({
                       onChange={(event) => setMessageInput(event.target.value)}
                       disabled={!profile || isBusy}
                       rows={3}
-                      className="w-full resize-none rounded-none border border-white/10 bg-black/85 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="w-full resize-none border border-white/10 bg-black/85 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60"
                       placeholder={profile ? "e.g. What makes Jackson strong for this role?" : "Complete the gate to chat"}
                     />
                     <div className="mt-3 flex items-center justify-between gap-3">
@@ -434,7 +435,7 @@ export function RecruiterConsole({
                       <MagneticButton
                         type="submit"
                         disabled={!profile || !messageInput.trim() || isBusy}
-                        className="hud-button inline-flex items-center gap-2 rounded-none px-4 py-2 text-sm font-medium text-[#ebfff1] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="hud-button inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#ebfff1] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {isBusy ? "Streaming…" : "Send"}
                       </MagneticButton>

@@ -17,6 +17,41 @@ type PortfolioEmbeddingRow = {
   source_url: string | null;
 };
 
+const FALLBACK_PROJECTS: PortfolioProject[] = [
+  {
+    slug: "recruiter-agent-module",
+    title: "Recruiter Agent Module",
+    summary: "Recruiter-facing portfolio module that helps visitors explore relevant experience, ask questions, and get a tailored overview of Jackson's background.",
+    segment: "Personal Projects",
+    tags: ["Next.js", "Vercel AI SDK", "Supabase", "OpenAI"],
+    sourceUrl: "https://www.notion.so/33029338df99812a855af1d20fdf8d04",
+  },
+  {
+    slug: "clawdbot-vitals",
+    title: "ClawdBot Vitals",
+    summary: "A playful, terminal-style portfolio component that shows monthly API token usage and host health without exposing secrets.",
+    segment: "Personal Projects",
+    tags: ["Observability", "Terminal UI", "OpenClaw"],
+    sourceUrl: "https://www.notion.so/33129338df9981cc9f46c19bbece537a",
+  },
+  {
+    slug: "all3dp-technical-writing",
+    title: "All3DP Technical Writing",
+    summary: "Technical 3D-printing writing across printers, slicing, materials, and workflows.",
+    segment: "Media / Writing",
+    tags: ["3D Printing", "Editorial", "Search"],
+    sourceUrl: "https://www.notion.so/4c69ffd4a8c247ec9c108e4708d5fb40",
+  },
+  {
+    slug: "3dsourced-technical-content",
+    title: "3DSourced Technical Content",
+    summary: "Editorial work that complements All3DP and PrintingAtoms with technical, search-friendly coverage.",
+    segment: "Media / Writing",
+    tags: ["3D Printing", "Content Strategy", "Editorial"],
+    sourceUrl: "https://www.notion.so/7280b0e54307485b94ba5e43f5a73a3f",
+  },
+];
+
 function createSupabaseClient() {
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
@@ -63,7 +98,7 @@ export async function getPortfolioProjects(limit = 8): Promise<PortfolioProject[
   const supabase = createSupabaseClient();
 
   if (!supabase) {
-    return [];
+    return FALLBACK_PROJECTS.slice(0, limit);
   }
 
   const { data, error } = await supabase
@@ -72,8 +107,8 @@ export async function getPortfolioProjects(limit = 8): Promise<PortfolioProject[
     .order("project_name", { ascending: true })
     .limit(limit);
 
-  if (error || !data) {
-    return [];
+  if (error || !data || data.length === 0) {
+    return FALLBACK_PROJECTS.slice(0, limit);
   }
 
   return (data as PortfolioEmbeddingRow[]).map((row) => ({

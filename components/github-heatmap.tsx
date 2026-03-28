@@ -40,7 +40,7 @@ function HeatmapCell({ cell, active, onHover }: { cell: ContributionCell; active
       onMouseEnter={() => onHover(cell)}
       onFocus={() => onHover(cell)}
       className={cn(
-        "h-3 w-3 rounded-[3px] border border-white/5 transition duration-150",
+        "h-3 w-3 rounded-none border border-white/5 transition duration-150",
         levelClass(cell.level),
         active ? "scale-[1.18] border-white/20" : "hover:scale-[1.12] hover:border-white/15"
       )}
@@ -64,7 +64,7 @@ export function GitHubActivityHeatmap({ heatmap }: { heatmap: ContributionHeatma
       viewport={viewportOnce}
       variants={fadeUpContainer}
     >
-      <motion.div variants={fadeUpItem} className="grid gap-8 border-t border-white/10 pt-8 lg:grid-cols-[280px_minmax(0,1fr)]">
+      <motion.div variants={fadeUpItem} inherit={false} className="grid gap-8 border-t border-white/10 pt-8 lg:grid-cols-[280px_minmax(0,1fr)]">
         <div className="space-y-4">
           <TextScramble text="GitHub activity" className="text-xs uppercase tracking-[0.3em] text-emerald-300/70" />
           <h2 className="max-w-xs text-3xl font-semibold tracking-tight text-white md:text-4xl">
@@ -76,7 +76,7 @@ export function GitHubActivityHeatmap({ heatmap }: { heatmap: ContributionHeatma
           </p>
           <div className="flex flex-wrap gap-3 text-[11px] uppercase tracking-[0.26em] text-white/35">
             <MagneticButton
-              className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-white/65 transition hover:border-emerald-400/25 hover:text-emerald-100"
+              className="border border-white/10 bg-white/5 px-3 py-1 text-white/65 transition hover:border-emerald-400/25 hover:text-emerald-100"
               onMouseEnter={() => {
                 if (heatmap && heatmap.weeks.length > 0 && !activeCell) {
                   const firstCell = heatmap.weeks[0]?.columns[0];
@@ -86,15 +86,14 @@ export function GitHubActivityHeatmap({ heatmap }: { heatmap: ContributionHeatma
             >
               Live profile
             </MagneticButton>
-            <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-white/45">
-              {summary ?? "Heatmap unavailable"}
-            </span>
+            <span className="border border-white/10 bg-black/20 px-3 py-1 text-white/45">{summary ?? "Heatmap unavailable"}</span>
           </div>
         </div>
 
         <motion.div
           variants={fadeUpItem}
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-5"
+          inherit={false}
+          className="rounded-none border border-white/10 bg-white/[0.04] p-5"
         >
           {heatmap && heatmap.weeks.length > 0 ? (
             <>
@@ -105,12 +104,9 @@ export function GitHubActivityHeatmap({ heatmap }: { heatmap: ContributionHeatma
                 </a>
               </div>
 
-              <motion.div
-                className="flex gap-1 overflow-x-auto pb-2"
-                variants={fadeUpContainer}
-              >
+              <motion.div className="flex gap-1 overflow-x-auto pb-2" variants={fadeUpContainer} inherit={false}>
                 {heatmap.weeks.map((week) => (
-                  <motion.div key={week.x} variants={fadeUpItem} className="flex flex-col gap-1">
+                  <motion.div key={week.x} variants={fadeUpItem} inherit={false} className="flex flex-col gap-1">
                     {week.columns.map((cell) => (
                       <HeatmapCell
                         key={cell.date}
@@ -131,16 +127,16 @@ export function GitHubActivityHeatmap({ heatmap }: { heatmap: ContributionHeatma
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/35">
-                  <span className="h-3 w-3 rounded-[3px] bg-white/10" />
-                  <span className="h-3 w-3 rounded-[3px] bg-emerald-400/30" />
-                  <span className="h-3 w-3 rounded-[3px] bg-emerald-400/55" />
-                  <span className="h-3 w-3 rounded-[3px] bg-emerald-400/80" />
-                  <span className="h-3 w-3 rounded-[3px] bg-emerald-300" />
+                  <span className="h-3 w-3 rounded-none bg-white/10" />
+                  <span className="h-3 w-3 rounded-none bg-emerald-400/30" />
+                  <span className="h-3 w-3 rounded-none bg-emerald-400/55" />
+                  <span className="h-3 w-3 rounded-none bg-emerald-400/80" />
+                  <span className="h-3 w-3 rounded-none bg-emerald-300" />
                 </div>
               </div>
             </>
           ) : (
-            <div className="rounded-3xl border border-dashed border-white/10 bg-black/20 p-6 text-sm leading-6 text-white/50">
+            <div className="rounded-none border border-dashed border-white/10 bg-black/20 p-6 text-sm leading-6 text-white/50">
               GitHub activity data is unavailable right now, so the page falls back to this empty state.
             </div>
           )}
