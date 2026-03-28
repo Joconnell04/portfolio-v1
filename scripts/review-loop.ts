@@ -1,6 +1,73 @@
-{
-  "code": 0,
-  "stdout": "type ReviewSurface = 'main' | 'recruiter' | 'ui';\n\ntype CreativeFrontendDesignerRole = {\n  id: 'creative-frontend-designer';\n  name: 'Creative Frontend Designer';\n  replaces: readonly ['generic formatting', 'architect'];\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg';\n  primaryFor: readonly ['portfolio-v1'];\n  surfaces: readonly ReviewSurface[];\n  systemPrompt: string;\n  style: readonly [\n    '3D brutalist',\n    'pitch black',\n    'high-contrast accents',\n    'blue for recruiter',\n    'neon/CRT for main',\n  ];\n  rules: readonly [\n    'Zero rounded corners',\n    'Sharp 90-degree edges',\n    '3D animated blocks',\n    'No redundant explanatory text',\n  ];\n  codeFormatting: readonly [\n    'Clean, minimalist, human-like',\n    'No AI-style comments',\n    'Strict TypeScript',\n    'Framer Motion best practices',\n  ];\n};\n\nexport const creativeFrontendDesigner = {\n  id: 'creative-frontend-designer',\n  name: 'Creative Frontend Designer',\n  replaces: ['generic formatting', 'architect'] as const,\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',\n  primaryFor: ['portfolio-v1'] as const,\n  surfaces: ['main', 'recruiter', 'ui'] as const,\n  systemPrompt: [\n    'You are the primary creative gatekeeper for portfolio-v1 UI work.',\n    'Style: 3D brutalist, pitch black, high-contrast accents.',\n    'Use blue accents for recruiter surfaces and neon/CRT accents for main surfaces.',\n    'Rules: zero rounded corners, sharp 90-degree edges, 3D animated blocks, no redundant explanatory text.',\n    'Code formatting: clean, minimalist, human-like, no AI-style comments, strict TypeScript, Framer Motion best practices.',\n    'Reject generic, templated, soft, or cluttered UI immediately.',\n  ].join(' '),\n  style: ['3D brutalist', 'pitch black', 'high-contrast accents', 'blue for recruiter', 'neon/CRT for main'] as const,\n  rules: ['Zero rounded corners', 'Sharp 90-degree edges', '3D animated blocks', 'No redundant explanatory text'] as const,\n  codeFormatting: ['Clean, minimalist, human-like', 'No AI-style comments', 'Strict TypeScript', 'Framer Motion best practices'] as const,\n} as const satisfies CreativeFrontendDesignerRole;\n\nexport const reviewLoopConfig = {\n  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',\n  primaryCreativeGatekeeper: creativeFrontendDesigner.id,\n  roles: [creativeFrontendDesigner],\n} as const;\n\nexport function resolvePrimaryCreativeGatekeeper(projectId: string, surface: ReviewSurface) {\n  if (projectId !== reviewLoopConfig.projectId) {\n    return null;\n  }\n\n  if (surface === 'main' || surface === 'recruiter' || surface === 'ui') {\n    return creativeFrontendDesigner;\n  }\n\n  return null;\n}\n\nif (import.meta.main) {\n  process.stdout.write(JSON.stringify(reviewLoopConfig, null, 2));\n  process.stdout.write('\n');\n}",
-  "stderr": "",
-  "durationMs": 53
+type ReviewSurface = 'main' | 'recruiter' | 'ui';
+
+type CreativeFrontendDesignerRole = {
+  id: 'creative-frontend-designer';
+  name: 'Creative Frontend Designer';
+  replaces: readonly ['generic formatting', 'architect'];
+  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg';
+  primaryFor: readonly ['portfolio-v1'];
+  surfaces: readonly ReviewSurface[];
+  systemPrompt: string;
+  style: readonly [
+    '3D brutalist',
+    'pitch black',
+    'high-contrast accents',
+    'blue for recruiter',
+    'neon/CRT for main',
+  ];
+  rules: readonly [
+    'Zero rounded corners',
+    'Sharp 90-degree edges',
+    '3D animated blocks',
+    'No redundant explanatory text',
+  ];
+  codeFormatting: readonly [
+    'Clean, minimalist, human-like',
+    'No AI-style comments',
+    'Strict TypeScript',
+    'Framer Motion best practices',
+  ];
+};
+
+export const creativeFrontendDesigner = {
+  id: 'creative-frontend-designer',
+  name: 'Creative Frontend Designer',
+  replaces: ['generic formatting', 'architect'] as const,
+  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',
+  primaryFor: ['portfolio-v1'] as const,
+  surfaces: ['main', 'recruiter', 'ui'] as const,
+  systemPrompt: [
+    'You are the primary creative gatekeeper for portfolio-v1 UI work.',
+    'Style: 3D brutalist, pitch black, high-contrast accents.',
+    'Use blue accents for recruiter surfaces and neon/CRT accents for main surfaces.',
+    'Rules: zero rounded corners, sharp 90-degree edges, 3D animated blocks, no redundant explanatory text.',
+    'Code formatting: clean, minimalist, human-like, no AI-style comments, strict TypeScript, Framer Motion best practices.',
+    'Reject generic, templated, soft, or cluttered UI immediately.',
+  ].join(' '),
+  style: ['3D brutalist', 'pitch black', 'high-contrast accents', 'blue for recruiter', 'neon/CRT for main'] as const,
+  rules: ['Zero rounded corners', 'Sharp 90-degree edges', '3D animated blocks', 'No redundant explanatory text'] as const,
+  codeFormatting: ['Clean, minimalist, human-like', 'No AI-style comments', 'Strict TypeScript', 'Framer Motion best practices'] as const,
+} as const satisfies CreativeFrontendDesignerRole;
+
+export const reviewLoopConfig = {
+  projectId: 'prj_sVqGHpCjJTaswnMIeqXshdd7WyVg',
+  primaryCreativeGatekeeper: creativeFrontendDesigner.id,
+  roles: [creativeFrontendDesigner],
+} as const;
+
+export function resolvePrimaryCreativeGatekeeper(projectId: string, surface: ReviewSurface) {
+  if (projectId !== reviewLoopConfig.projectId) {
+    return null;
+  }
+
+  if (surface === 'main' || surface === 'recruiter' || surface === 'ui') {
+    return creativeFrontendDesigner;
+  }
+
+  return null;
+}
+
+if (import.meta.main) {
+  process.stdout.write(JSON.stringify(reviewLoopConfig, null, 2));
+  process.stdout.write('\n');
 }
