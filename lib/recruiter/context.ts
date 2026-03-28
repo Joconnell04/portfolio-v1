@@ -110,11 +110,7 @@ export async function buildRecruiterContext(query: string, limit = 6) {
   return matches
     .map((match, index) => {
       const metadata = match.metadata ? JSON.stringify(match.metadata) : "{}";
-      return (index + 1) + ". similarity=" + match.similarity.toFixed(3) + "
-content: " + match.content + "
-metadata: " + metadata;
+      return (index + 1) + ". similarity=" + match.similarity.toFixed(3) + " | content=" + match.content + " | metadata=" + metadata;
     })
-    .join("
-
-");
+    .join(" || ");
 }
