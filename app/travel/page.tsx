@@ -11,7 +11,8 @@ export default async function TravelPage() {
     <PortfolioRouteShell
       eyebrow='travel'
       title='Coordinates'
-      description="Jackson's actual travel history plotted on an interactive globe with destination pop-ups."
+      description="Jackson's actual travel history plotted on a full-page interactive globe with destination pop-ups."
+      contentClassName='max-w-none px-4 pb-0 sm:px-6 lg:px-8'
     >
       <TravelCoordinates locations={locations} />
     </PortfolioRouteShell>
