@@ -75,7 +75,7 @@ async function fetchGraphQLHeatmap(username: string): Promise<ContributionHeatma
       body: JSON.stringify({
         query: `query($login: String!) {
           user(login: $login) {
-            contributionsCollection {
+            contributionsCollection(includePrivate: true) {
               contributionCalendar {
                 totalContributions
                 weeks {
