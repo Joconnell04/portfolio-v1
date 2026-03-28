@@ -14,3 +14,4 @@ Progress log
 - Travel route is being moved from Mission Control to Coordinates and seeded only from the Notion Travel hub.
 - Project cards are no longer draggable, and the home project section now includes a View More CTA to /projects.
 - Recruiter console starts collapsed on load and the reset-gate button has been removed.
+- Travel Coordinates build blocker fixed by escaping the apostrophe in the route shell description, and GitHub heatmap parsing now skips missing contribution dates instead of fabricating values.
