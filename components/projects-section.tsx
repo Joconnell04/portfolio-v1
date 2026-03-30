@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { TextScramble } from "@/components/text-scramble";
 import { fadeUpContainer, fadeUpItem, viewportOnce } from "@/components/reveal";
 import type { PortfolioProject } from "@/lib/supabase/portfolio-projects";
 
@@ -16,92 +15,73 @@ function isWorkExperience(project: PortfolioProject) {
   );
 }
 
-function ProjectCard({
+function ProjectRow({
   project,
-  index,
   accent,
 }: {
   project: PortfolioProject;
-  index: number;
   accent: string;
 }) {
   return (
-    <motion.article
+    <motion.div
       variants={fadeUpItem}
       inherit={false}
-      whileHover={{ y: -3 }}
-      transition={{ type: "spring", stiffness: 300, damping: 28 }}
-      className="group overflow-hidden border bg-black"
-      style={{
-        borderColor: accent + "40",
-        boxShadow: `8px 8px 0 ${accent}60`,
-      }}
+      className="group border-t border-white/[0.06] py-6 first:border-t-0"
     >
-      {/* Card header */}
-      <div
-        className="flex items-center justify-between border-b px-4 py-3 text-[10px] uppercase tracking-[0.3em]"
-        style={{ borderColor: accent + "30", backgroundColor: "#030003" }}
-      >
-        <span style={{ color: accent + "cc" }}>
-          {project.segment ?? "Project"}
-        </span>
-        <span className="text-white/25">
-          {String(index + 1).padStart(2, "0")}
-        </span>
-      </div>
-
-      {/* Card body */}
-      <div className="space-y-4 p-5 sm:p-6">
-        {/* Tags */}
-        {project.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {project.tags.slice(0, 4).map((tag) => (
-              <span
-                key={tag}
-                className="px-2 py-0.5 text-[10px] uppercase tracking-[0.2em]"
-                style={{
-                  border: `1px solid ${accent}35`,
-                  color: accent + "aa",
-                }}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Title */}
-        <h3 className="text-xl font-semibold uppercase tracking-[0.1em] text-[#f0eaff] sm:text-2xl">
-          <TextScramble text={project.title} />
-        </h3>
-
-        {/* Summary */}
-        <p className="max-w-3xl text-sm leading-7 text-white/55">
-          {project.summary}
-        </p>
-
-        {/* Footer */}
-        {project.sourceUrl && (
-          <div
-            className="flex items-center justify-end border-t pt-4"
-            style={{ borderColor: accent + "20" }}
-          >
-            <a
-              href={project.sourceUrl}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex items-center border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors duration-150"
-              style={{
-                borderColor: accent + "60",
-                color: accent,
-              }}
+      <div className="flex items-start justify-between gap-6">
+        <div className="min-w-0 flex-1">
+          {/* Segment label */}
+          {project.segment && (
+            <p
+              className="mb-1.5 text-[10px] uppercase tracking-[0.3em]"
+              style={{ color: accent + "99" }}
             >
-              GitHub
-            </a>
-          </div>
+              {project.segment}
+            </p>
+          )}
+
+          {/* Title */}
+          <h3 className="text-base font-medium text-white/90 transition-colors duration-150 group-hover:text-white">
+            {project.title}
+          </h3>
+
+          {/* Summary */}
+          {project.summary && (
+            <p className="mt-2 text-sm leading-6 text-white/45">
+              {project.summary}
+            </p>
+          )}
+
+          {/* Tags */}
+          {project.tags.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
+              {project.tags.slice(0, 5).map((tag) => (
+                <span
+                  key={tag}
+                  className="font-mono text-[10px] tracking-wide"
+                  style={{ color: accent + "66" }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Source link */}
+        {project.sourceUrl && (
+          <a
+            href={project.sourceUrl}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="mt-0.5 shrink-0 text-[10px] uppercase tracking-[0.2em] text-white/25 transition-colors duration-150 hover:text-white/70"
+            aria-label={`${project.title} on GitHub`}
+          >
+            GitHub ↗
+          </a>
         )}
       </div>
-    </motion.article>
+    </motion.div>
   );
 }
 
@@ -117,30 +97,25 @@ function CategorySection({
   if (projects.length === 0) return null;
 
   return (
-    <motion.div variants={fadeUpItem} inherit={false} className="space-y-5">
-      <div className="flex items-center gap-4">
+    <motion.div variants={fadeUpItem} inherit={false} className="space-y-0">
+      {/* Section header */}
+      <div className="mb-2 flex items-center gap-3">
         <span
-          className="text-[11px] uppercase tracking-[0.32em]"
+          className="text-[10px] uppercase tracking-[0.32em]"
           style={{ color: accent }}
         >
-          &gt; {label}
+          {label}
         </span>
         <div
           className="h-px flex-1"
-          style={{ backgroundColor: accent + "30" }}
+          style={{ backgroundColor: accent + "25" }}
         />
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/25">
-          {projects.length} {projects.length === 1 ? "entry" : "entries"}
-        </span>
       </div>
-      <motion.div className="grid gap-4" variants={fadeUpContainer}>
-        {projects.map((project, i) => (
-          <ProjectCard
-            key={project.slug}
-            project={project}
-            index={i}
-            accent={accent}
-          />
+
+      {/* Project rows */}
+      <motion.div variants={fadeUpContainer}>
+        {projects.map((project) => (
+          <ProjectRow key={project.slug} project={project} accent={accent} />
         ))}
       </motion.div>
     </motion.div>
@@ -152,42 +127,43 @@ export function ProjectsSection({
 }: {
   projects: PortfolioProject[];
 }) {
-  const workProjects = projects.filter((p) => isWorkExperience(p));
-  const personalProjects = projects.filter((p) => !isWorkExperience(p));
+  const work = projects.filter((p) => isWorkExperience(p));
+  const personal = projects.filter((p) => !isWorkExperience(p));
 
   return (
     <motion.section
-      className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 lg:px-8"
+      className="mx-auto max-w-3xl px-6 pb-24 sm:px-8"
       initial="hidden"
       whileInView="visible"
       viewport={viewportOnce}
       variants={fadeUpContainer}
     >
+      {/* Section label */}
       <motion.div
         variants={fadeUpItem}
         inherit={false}
         className="mb-10 flex items-center justify-between"
       >
-        <span className="text-[11px] uppercase tracking-[0.32em] text-white/30">
+        <span className="text-[10px] uppercase tracking-[0.3em] text-white/25">
           Selected work
         </span>
         <Link
           href="/projects"
           className="text-[10px] uppercase tracking-[0.22em] text-[#a855f7] transition-colors duration-150 hover:text-[#c084fc]"
         >
-          View all &rsaquo;
+          All projects →
         </Link>
       </motion.div>
 
-      <div className="space-y-14">
+      <div className="space-y-12">
         <CategorySection
           label="Work Experience"
-          projects={workProjects}
+          projects={work}
           accent={MAGENTA}
         />
         <CategorySection
           label="Personal Projects"
-          projects={personalProjects}
+          projects={personal}
           accent={PURPLE}
         />
       </div>
