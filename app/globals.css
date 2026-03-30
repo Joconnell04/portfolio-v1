@@ -5,9 +5,10 @@
 :root {
   color-scheme: dark;
   --bg: #000000;
-  --fg: #e9ffe9;
-  --neon: #00ff87;
-  --cyan: #00e5ff;
+  --fg: #f0eaff;
+  --purple: #a855f7;
+  --magenta: #e879f9;
+  --muted: #9b87c0;
   --pointer-x: 50vw;
   --pointer-y: 25vh;
 }
@@ -27,12 +28,21 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   background:
-    radial-gradient(circle at var(--pointer-x) var(--pointer-y), rgba(0, 255, 135, 0.12), transparent 22%),
-    radial-gradient(circle at 80% 10%, rgba(0, 229, 255, 0.1), transparent 20%),
-    linear-gradient(180deg, rgba(0, 255, 135, 0.05), transparent 30%),
-    #000000;
+    radial-gradient(
+      circle at var(--pointer-x) var(--pointer-y),
+      rgba(168, 85, 247, 0.08),
+      transparent 22%
+    ),
+    radial-gradient(
+      circle at 80% 10%,
+      rgba(232, 121, 249, 0.07),
+      transparent 20%
+    ),
+    linear-gradient(180deg, rgba(168, 85, 247, 0.04), transparent 30%), #000000;
   color: var(--fg);
-  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-family:
+    var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, monospace;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
@@ -48,28 +58,27 @@ body::after {
   z-index: 0;
 }
 
+/* Subtle scanline grid */
 body::before {
   background:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
-  background-size: 100% 3px, 48px 48px;
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size:
+    100% 3px,
+    48px 48px;
   mix-blend-mode: screen;
-  opacity: 0.35;
+  opacity: 0.3;
   animation: scan-drift 18s linear infinite;
 }
 
+/* Vignette */
 body::after {
-  background:
-    radial-gradient(circle at 50% 50%, transparent 0 62%, rgba(0, 0, 0, 0.55) 100%),
-    repeating-linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.035) 0,
-      rgba(255, 255, 255, 0.035) 1px,
-      transparent 2px,
-      transparent 5px
-    );
-  opacity: 0.45;
-  mix-blend-mode: screen;
+  background: radial-gradient(
+    circle at 50% 50%,
+    transparent 0 60%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  opacity: 0.5;
 }
 
 main,
@@ -88,37 +97,47 @@ a {
 }
 
 ::selection {
-  background: rgba(0, 255, 135, 0.25);
-  color: #000;
+  background: rgba(168, 85, 247, 0.3);
+  color: #fff;
 }
 
+/* HUD window — purple variant (default) */
 .hud-window {
-  border: 1px solid rgba(0, 255, 135, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.35);
   background: rgba(0, 0, 0, 0.95);
-  box-shadow: 12px 12px 0 rgba(0, 255, 135, 0.9), -1px -1px 0 rgba(0, 229, 255, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  box-shadow: 10px 10px 0 rgba(168, 85, 247, 0.5);
 }
 
-.hud-window--cyan {
-  border-color: rgba(0, 229, 255, 0.9);
-  box-shadow: 12px 12px 0 rgba(0, 229, 255, 0.9), -1px -1px 0 rgba(0, 255, 135, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+/* HUD window — magenta variant (work experience) */
+.hud-window--magenta {
+  border-color: rgba(232, 121, 249, 0.35);
+  box-shadow: 10px 10px 0 rgba(232, 121, 249, 0.5);
 }
 
+/* HUD button */
 .hud-button {
-  border: 1px solid rgba(0, 255, 135, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.7);
   background: #000;
-  box-shadow: 8px 8px 0 rgba(0, 255, 135, 0.9);
+  box-shadow: 4px 4px 0 rgba(168, 85, 247, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.18em;
+  cursor: pointer;
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+  display: inline-flex;
+  align-items: center;
 }
 
-.hud-button:hover,
-.hud-window:hover {
-  animation: glitch-flash 0.18s steps(2, end) 1;
+.hud-button:hover {
+  box-shadow: 6px 6px 0 rgba(168, 85, 247, 1);
+  transform: translate(-1px, -1px);
 }
 
+/* Eyebrow label */
 .bootline {
   display: inline-block;
-  color: rgba(0, 255, 135, 0.92);
+  color: rgba(232, 121, 249, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.32em;
   font-size: 0.72rem;
@@ -126,43 +145,17 @@ a {
 
 .bootline::before {
   content: "> ";
-  color: rgba(0, 229, 255, 0.92);
+  color: rgba(168, 85, 247, 0.85);
 }
 
+/* ASCII / terminal decoration */
 .ascii-rain {
   font-size: 0.7rem;
-  line-height: 1;
+  line-height: 1.4;
   letter-spacing: 0.18em;
-  color: rgba(0, 255, 135, 0.24);
-  text-shadow: 0 0 10px rgba(0, 255, 135, 0.35);
+  color: rgba(168, 85, 247, 0.35);
   user-select: none;
   white-space: pre-wrap;
-}
-
-.glitch-text {
-  position: relative;
-}
-
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  clip-path: inset(0 0 0 0);
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-.glitch-text::before {
-  transform: translate(1px, 0);
-  color: rgba(0, 229, 255, 0.9);
-  animation: glitch-shift 2.2s infinite linear alternate-reverse;
-}
-
-.glitch-text::after {
-  transform: translate(-1px, 0);
-  color: rgba(0, 255, 135, 0.9);
-  animation: glitch-shift 1.8s infinite linear alternate-reverse;
 }
 
 @keyframes scan-drift {
@@ -171,41 +164,5 @@ a {
   }
   100% {
     transform: translateY(3px);
-  }
-}
-
-@keyframes glitch-flash {
-  0%, 100% {
-    transform: translate(0, 0);
-  }
-  25% {
-    transform: translate(-1px, 1px) skewX(1deg);
-  }
-  50% {
-    transform: translate(1px, -1px) skewX(-1deg);
-  }
-  75% {
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes glitch-shift {
-  0% {
-    clip-path: inset(0 0 88% 0);
-  }
-  20% {
-    clip-path: inset(18% 0 38% 0);
-  }
-  40% {
-    clip-path: inset(62% 0 12% 0);
-  }
-  60% {
-    clip-path: inset(12% 0 58% 0);
-  }
-  80% {
-    clip-path: inset(46% 0 30% 0);
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
   }
 }

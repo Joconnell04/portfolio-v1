@@ -1,113 +1,196 @@
 "use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { TextScramble } from '@/components/text-scramble';
-import { fadeUpContainer, fadeUpItem, viewportOnce } from '@/components/reveal';
-import { cn } from '@/lib/utils';
-import type { PortfolioProject } from '@/lib/supabase/portfolio-projects';
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { TextScramble } from "@/components/text-scramble";
+import { fadeUpContainer, fadeUpItem, viewportOnce } from "@/components/reveal";
+import type { PortfolioProject } from "@/lib/supabase/portfolio-projects";
 
-const ACCENTS = ['#00ff87', '#00e5ff', '#f7ff00', '#ff4df8'] as const;
+const PURPLE = "#a855f7";
+const MAGENTA = "#e879f9";
 
-export function ProjectsSection({ projects }: { projects: PortfolioProject[] }) {
-  const visibleProjects = projects;
+function isWorkExperience(project: PortfolioProject) {
+  const seg = project.segment?.toLowerCase() ?? "";
+  return (
+    seg.includes("work") || seg.includes("experience") || seg.includes("intern")
+  );
+}
+
+function ProjectCard({
+  project,
+  index,
+  accent,
+}: {
+  project: PortfolioProject;
+  index: number;
+  accent: string;
+}) {
+  return (
+    <motion.article
+      variants={fadeUpItem}
+      inherit={false}
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 300, damping: 28 }}
+      className="group overflow-hidden border bg-black"
+      style={{
+        borderColor: accent + "40",
+        boxShadow: `8px 8px 0 ${accent}60`,
+      }}
+    >
+      {/* Card header */}
+      <div
+        className="flex items-center justify-between border-b px-4 py-3 text-[10px] uppercase tracking-[0.3em]"
+        style={{ borderColor: accent + "30", backgroundColor: "#030003" }}
+      >
+        <span style={{ color: accent + "cc" }}>
+          {project.segment ?? "Project"}
+        </span>
+        <span className="text-white/25">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+      </div>
+
+      {/* Card body */}
+      <div className="space-y-4 p-5 sm:p-6">
+        {/* Tags */}
+        {project.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {project.tags.slice(0, 4).map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 text-[10px] uppercase tracking-[0.2em]"
+                style={{
+                  border: `1px solid ${accent}35`,
+                  color: accent + "aa",
+                }}
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Title */}
+        <h3 className="text-xl font-semibold uppercase tracking-[0.1em] text-[#f0eaff] sm:text-2xl">
+          <TextScramble text={project.title} />
+        </h3>
+
+        {/* Summary */}
+        <p className="max-w-3xl text-sm leading-7 text-white/55">
+          {project.summary}
+        </p>
+
+        {/* Footer */}
+        {project.sourceUrl && (
+          <div
+            className="flex items-center justify-end border-t pt-4"
+            style={{ borderColor: accent + "20" }}
+          >
+            <a
+              href={project.sourceUrl}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="inline-flex items-center border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors duration-150"
+              style={{
+                borderColor: accent + "60",
+                color: accent,
+              }}
+            >
+              GitHub
+            </a>
+          </div>
+        )}
+      </div>
+    </motion.article>
+  );
+}
+
+function CategorySection({
+  label,
+  projects,
+  accent,
+}: {
+  label: string;
+  projects: PortfolioProject[];
+  accent: string;
+}) {
+  if (projects.length === 0) return null;
+
+  return (
+    <motion.div variants={fadeUpItem} inherit={false} className="space-y-5">
+      <div className="flex items-center gap-4">
+        <span
+          className="text-[11px] uppercase tracking-[0.32em]"
+          style={{ color: accent }}
+        >
+          &gt; {label}
+        </span>
+        <div
+          className="h-px flex-1"
+          style={{ backgroundColor: accent + "30" }}
+        />
+        <span className="text-[10px] uppercase tracking-[0.2em] text-white/25">
+          {projects.length} {projects.length === 1 ? "entry" : "entries"}
+        </span>
+      </div>
+      <motion.div className="grid gap-4" variants={fadeUpContainer}>
+        {projects.map((project, i) => (
+          <ProjectCard
+            key={project.slug}
+            project={project}
+            index={i}
+            accent={accent}
+          />
+        ))}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export function ProjectsSection({
+  projects,
+}: {
+  projects: PortfolioProject[];
+}) {
+  const workProjects = projects.filter((p) => isWorkExperience(p));
+  const personalProjects = projects.filter((p) => !isWorkExperience(p));
 
   return (
     <motion.section
-      className='mx-auto w-full max-w-7xl px-4 pb-20 pt-10 sm:px-6 sm:pb-28 lg:px-8'
-      initial='hidden'
-      whileInView='visible'
+      className="mx-auto w-full max-w-7xl px-4 pb-24 pt-12 sm:px-6 lg:px-8"
+      initial="hidden"
+      whileInView="visible"
       viewport={viewportOnce}
       variants={fadeUpContainer}
     >
-      <motion.div variants={fadeUpItem} inherit={false} className='grid gap-6 border-t border-[#00ff87]/50 pt-8 lg:grid-cols-[280px_minmax(0,1fr)]'>
-        <div className='hud-window p-5 sm:p-6'>
-          <span className='bootline'>selected windows</span>
-          <h2 className='mt-4 max-w-xs text-2xl font-semibold uppercase tracking-[0.22em] text-[#f3fff6] sm:text-3xl'>
-            project huds
-          </h2>
-          <p className='mt-4 text-sm leading-6 text-[#a7ffbf]'>
-            Each project stays fixed in place with sharp geometry and a synthetic 3D pop.
-          </p>
-          <div className='mt-6 grid gap-2 text-[11px] uppercase tracking-[0.24em] text-[#84ffb1]'>
-            <span className='hud-button inline-flex w-fit items-center px-3 py-2'>hover for glitch</span>
-            <span className='hud-button inline-flex w-fit items-center px-3 py-2'>project cards loaded</span>
-            <Link href='/projects' className='hud-button inline-flex w-fit items-center px-3 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'>
-              View More
-            </Link>
-          </div>
-        </div>
-
-        <motion.div className='grid gap-5' variants={fadeUpContainer}>
-          {visibleProjects.length === 0 ? (
-            <motion.div variants={fadeUpItem} inherit={false} className='hud-window p-6 text-sm leading-6 text-[#a7ffbf]'>
-              Project data is loading. Check the portfolio graph connection and refresh shortly.
-            </motion.div>
-          ) : (
-            visibleProjects.map((project, index) => {
-              const accent = ACCENTS[index % ACCENTS.length];
-              return (
-                <motion.article
-                  key={project.slug}
-                  variants={fadeUpItem}
-                  inherit={false}
-                  whileHover={{ y: -4, scale: 1.01 }}
-                  transition={{ type: 'spring', stiffness: 260, damping: 20 }}
-                  className={cn(
-                    'hud-window group overflow-hidden bg-black p-0',
-                    index % 2 === 0 ? 'sm:-rotate-1' : 'sm:rotate-1'
-                  )}
-                  style={{ boxShadow: '14px 14px 0 ' + accent }}
-                >
-                  <div className='flex items-center justify-between border-b border-[#00ff87]/80 bg-[#030503] px-4 py-3 text-[11px] uppercase tracking-[0.3em] text-[#8bffbc]'>
-                    <span>{project.segment ?? 'Portfolio project'}</span>
-                    <span>{String(index + 1).padStart(2, '0')}</span>
-                  </div>
-
-                  <div className='space-y-4 p-4 sm:p-5'>
-                    <div className='flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.26em] text-[#7dffad]'>
-                      {project.tags.slice(0, 3).map((tag) => (
-                        <span key={tag} className='border border-[#00ff87]/70 bg-black px-2.5 py-1'>
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <h3 className='glitch-text text-2xl font-semibold uppercase tracking-[0.12em] text-[#f7fff9] sm:text-3xl' data-text={project.title}>
-                      {project.title}
-                    </h3>
-
-                    <p className='max-w-4xl text-sm leading-7 text-[#ccffd8] sm:text-[15px]'>
-                      <TextScramble text={project.summary} />
-                    </p>
-
-                    {project.sourceUrl ? (
-                      <div className='flex flex-wrap items-center justify-between gap-3 border-t border-[#00ff87]/30 pt-4 text-[11px] uppercase tracking-[0.28em] text-[#8cffb6]'>
-                        <span>3d pop / sharp edges / zero radius</span>
-                        <a
-                          href={project.sourceUrl}
-                          target='_blank'
-                          rel='noreferrer noopener'
-                          className='hud-button inline-flex items-center px-4 py-2 text-[#ebfff1] transition hover:-translate-y-0.5'
-                        >
-                          source
-                        </a>
-                      </div>
-                    ) : null}
-                  </div>
-                </motion.article>
-              );
-            })
-          )}
-        </motion.div>
-
-        <div className='hud-window border border-white/10 bg-black/90 px-4 py-3 text-[11px] uppercase tracking-[0.26em] text-[#8cffb6] lg:col-span-2'>
-          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-            <span>project summaries stay visible on every card</span>
-            <span>{visibleProjects.length} visible / {projects.length} total</span>
-          </div>
-        </div>
+      <motion.div
+        variants={fadeUpItem}
+        inherit={false}
+        className="mb-10 flex items-center justify-between"
+      >
+        <span className="text-[11px] uppercase tracking-[0.32em] text-white/30">
+          Selected work
+        </span>
+        <Link
+          href="/projects"
+          className="text-[10px] uppercase tracking-[0.22em] text-[#a855f7] transition-colors duration-150 hover:text-[#c084fc]"
+        >
+          View all &rsaquo;
+        </Link>
       </motion.div>
+
+      <div className="space-y-14">
+        <CategorySection
+          label="Work Experience"
+          projects={workProjects}
+          accent={MAGENTA}
+        />
+        <CategorySection
+          label="Personal Projects"
+          projects={personalProjects}
+          accent={PURPLE}
+        />
+      </div>
     </motion.section>
   );
 }

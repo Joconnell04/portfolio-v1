@@ -1,4 +1,5 @@
 import { Geist_Mono, Space_Grotesk } from "next/font/google";
+import { Nav } from "@/components/nav";
 import "./globals.css";
 
 const geistMono = Geist_Mono({
@@ -14,14 +15,25 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata = {
-  title: "Jackson O’Connell | Portfolio",
-  description: "High-contrast creative portfolio built as a futuristic digital art piece.",
+  title: "Jackson O’Connell",
+  description:
+    "4th Year CS Student at Georgia Institute of Technology. Data engineering, ML systems, and full-stack tooling.",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`dark ${geistMono.variable} ${spaceGrotesk.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`dark ${geistMono.variable} ${spaceGrotesk.variable}`}
+    >
+      <body>
+        <Nav />
+        {children}
+      </body>
     </html>
   );
 }

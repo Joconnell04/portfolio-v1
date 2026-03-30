@@ -3,18 +3,24 @@ import { PortfolioRouteShell } from "@/components/portfolio-route-shell";
 const WRITING = [
   {
     title: "All3DP Technical Writing",
-    summary: "Technical 3D-printing writing across printers, slicing, materials, and workflows.",
+    summary:
+      "Technical 3D-printing writing across printers, slicing, materials, and workflows.",
     href: "https://all3dp.com/authors/jacksonoconnell/",
+    accent: "#a855f7",
   },
   {
     title: "3DSourced Technical Content",
-    summary: "Editorial work that complements All3DP and PrintingAtoms with technical, search-friendly coverage.",
+    summary:
+      "Editorial work covering 3D printing hardware, software, and industry topics with a search-first approach.",
     href: "https://3dsourced.com/",
+    accent: "#e879f9",
   },
   {
-    title: "PrintingAtoms archive",
-    summary: "Long-form writing and editorial leadership around 3D-printing hardware, software, and industry topics.",
+    title: "PrintingAtoms Archive",
+    summary:
+      "Long-form writing and editorial leadership around 3D-printing hardware, software, and workflows.",
     href: "https://printingatoms.com/",
+    accent: "#a855f7",
   },
 ] as const;
 
@@ -27,42 +33,62 @@ export default function WritingPage() {
     <PortfolioRouteShell
       eyebrow="writing"
       title="Selected writing"
-      description="Scraper-style cards for the technical writing and editorial work that sits alongside the engineering projects."
+      description="Technical writing and editorial work in 3D printing, hardware, and workflows."
     >
       <section className="grid gap-4 lg:grid-cols-3">
         {WRITING.map((item, index) => (
-          <article key={item.title} className="hud-window flex h-full flex-col overflow-hidden border border-[#00ff87]/40 bg-black p-0 shadow-[10px_10px_0_rgba(0,229,255,0.15)]">
-            <div className="flex items-center justify-between border-b border-white/10 bg-[#030503] px-4 py-3 text-[11px] uppercase tracking-[0.3em] text-[#8bffbc]">
-              <span>scraper card</span>
-              <span>{String(index + 1).padStart(2, "0")}</span>
+          <article
+            key={item.title}
+            className="flex h-full flex-col overflow-hidden border bg-black"
+            style={{
+              borderColor: item.accent + "35",
+              boxShadow: `8px 8px 0 ${item.accent}50`,
+            }}
+          >
+            <div
+              className="flex items-center justify-between border-b px-4 py-3 text-[10px] uppercase tracking-[0.3em]"
+              style={{
+                borderColor: item.accent + "25",
+                backgroundColor: "#030003",
+              }}
+            >
+              <span style={{ color: item.accent + "aa" }}>
+                {sourceHost(item.href)}
+              </span>
+              <span className="text-white/25">
+                {String(index + 1).padStart(2, "0")}
+              </span>
             </div>
 
-            <div className="space-y-4 p-5">
-              <div className="flex items-center justify-between gap-3 text-[10px] uppercase tracking-[0.26em] text-[#7dffad]">
-                <span>{sourceHost(item.href)}</span>
-                <span>source</span>
-              </div>
-              <h2 className="text-2xl font-semibold uppercase tracking-[0.12em] text-[#f7fff9]">{item.title}</h2>
-              <p className="text-sm leading-6 text-[#d7ffe1]">{item.summary}</p>
-            </div>
+            <div className="flex flex-1 flex-col space-y-4 p-5">
+              <h2 className="text-xl font-semibold uppercase tracking-[0.1em] text-[#f0eaff] sm:text-2xl">
+                {item.title}
+              </h2>
+              <p className="flex-1 text-sm leading-6 text-white/55">
+                {item.summary}
+              </p>
 
-            <div className="mt-auto border-t border-[#00ff87]/30 p-5 pt-4">
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="hud-button inline-flex items-center border border-[#00ff87]/60 bg-black px-3 py-2 text-[11px] uppercase tracking-[0.24em] text-[#ebfff1] transition hover:-translate-y-0.5"
+              <div
+                style={{ borderColor: item.accent + "25" }}
+                className="border-t pt-4"
               >
-                Open source
-              </a>
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex items-center border px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] transition-colors duration-150"
+                  style={{
+                    borderColor: item.accent + "60",
+                    color: item.accent,
+                  }}
+                >
+                  Open
+                </a>
+              </div>
             </div>
           </article>
         ))}
       </section>
-
-      <footer className="mt-6 border-t border-white/10 pt-4 text-[11px] uppercase tracking-[0.28em] text-[#8cffb6]">
-        source links stay visible on every writing card
-      </footer>
     </PortfolioRouteShell>
   );
 }
