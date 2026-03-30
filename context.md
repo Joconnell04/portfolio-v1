@@ -8,6 +8,8 @@ Aesthetic: human, anti-slop, brutalist, sharp, zero-radius, high-contrast.
 
 Operating rule: public-facing copy is provided externally. Do not invent or rewrite site copy unless explicitly instructed.
 
+Protocol 13 - Cost Efficiency: prioritize token efficiency, use context pruning more aggressively, and avoid redundant high-token calls like frequent full-site scrapes unless strictly necessary. The user recently hit a $100 Gemini API bill and wants more conservative usage going forward.
+
 Maintenance rule: keep this file updated so future sessions can recover high-level context quickly.
 Progress log
 - I updated the portfolio narrative for a general audience and removed the recruiter-console framing.
